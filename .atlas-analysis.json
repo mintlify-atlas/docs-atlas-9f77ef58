@@ -1,0 +1,76 @@
+{
+  "projectType": "general",
+  "projectName": "Dotfiles",
+  "projectDescription": "Personal Linux configuration for Hyprland with modular configs for Fish, Neovim, Waybar, and more",
+  "theme": "aspen",
+  "primaryColor": "#89b4fa",
+  "lightColor": "#cba6f7",
+  "darkColor": "#89dceb",
+  "navigation": {
+    "groups": [
+      {
+        "group": "Get Started",
+        "pages": [
+          "introduction",
+          "installation",
+          "requirements"
+        ]
+      },
+      {
+        "group": "Configuration",
+        "pages": [
+          "config/hyprland",
+          "config/fish",
+          "config/neovim",
+          "config/waybar",
+          "config/kitty",
+          "config/rofi",
+          "config/tmux",
+          "config/git"
+        ]
+      },
+      {
+        "group": "Platform Guides",
+        "pages": [
+          "platforms/fedora",
+          "platforms/arch",
+          "platforms/other"
+        ]
+      },
+      {
+        "group": "Customization",
+        "pages": [
+          "customization/themes",
+          "customization/keybindings",
+          "customization/fonts",
+          "customization/extending"
+        ]
+      },
+      {
+        "group": "Troubleshooting",
+        "pages": [
+          "troubleshooting/common-issues",
+          "troubleshooting/faq"
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Modular Hyprland configuration with 12-factor design",
+    "Fish shell with VI keybindings and custom abbreviations",
+    "LazyVim-based Neovim setup",
+    "Catppuccin Mocha themed Waybar",
+    "GNU Stow-based installation system",
+    "Fedora and Arch Linux support"
+  ],
+  "publicApiSurface": [
+    "hyprland.conf - Main Hyprland configuration",
+    "config.fish - Fish shell configuration",
+    "init.lua - Neovim initialization",
+    "config.jsonc - Waybar configuration",
+    "style.css - Waybar styling",
+    "config.rasi - Rofi configuration",
+    ".gitconfig - Git configuration",
+    ".stowrc - GNU Stow configuration"
+  ]
+}
