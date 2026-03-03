@@ -16,7 +16,7 @@ Choose between a one-command quick install or manual installation for more contr
 The fastest way to get started is with the automated install script:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/shawal-mbalire/root_home_shawal/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/shawal-mbalire/dotfiles/main/install.sh | bash
 ```
 
 This script will:
@@ -35,8 +35,8 @@ For more control over the installation process, follow these steps:
 <Steps>
   <Step title="Clone the repository">
     ```bash
-    git clone https://github.com/shawal-mbalire/root_home_shawal
-    cd root_home_shawal
+    git clone https://github.com/shawal-mbalire/dotfiles
+    cd dotfiles
     ```
   </Step>
   
@@ -79,7 +79,7 @@ For more control over the installation process, follow these steps:
     If you prefer to copy files instead of symlinking:
     
     ```bash
-    rsync -avhu --progress root_home_shawal/ ~/
+    rsync -avhu --progress dotfiles/ ~/
     ```
     
     The flags mean:
@@ -106,10 +106,10 @@ For Fedora users, follow these comprehensive setup steps:
   
   <Step title="Clone and setup the repository">
     ```bash
-    gh repo clone shawal-mbalire/root_home_shawal
-    cp -r root_home_shawal/.git/ .git/
+    gh repo clone shawal-mbalire/dotfiles
+    cp -r dotfiles/.git/ .git/
     git pull
-    rm -rf root_home_shawal
+    rm -rf dotfiles
     ```
   </Step>
   
@@ -163,8 +163,8 @@ For Arch-based distributions:
   
   <Step title="Clone and install dotfiles">
     ```bash
-    git clone https://github.com/shawal-mbalire/root_home_shawal
-    cd root_home_shawal
+    git clone https://github.com/shawal-mbalire/dotfiles
+    cd dotfiles
     stow .  # Or use rsync method
     ```
   </Step>
