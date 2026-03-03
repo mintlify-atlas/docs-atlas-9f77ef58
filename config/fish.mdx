@@ -1,0 +1,275 @@
+---
+title: Fish Shell Configuration
+description: 12-factor Fish shell configuration with VI keybindings and modern tool integrations
+---
+
+## Overview
+
+This Fish shell configuration follows 12-factor app principles for portability and maintainability. It's designed to work consistently across different environments with minimal setup.
+
+## 12-Factor Design Principles
+
+The configuration applies these principles:
+
+- **Config**: Environment variables for all configuration
+- **Dependencies**: Explicit tool declarations with conditional loading
+- **Dev/Prod Parity**: Consistent abbreviations and settings
+- **Portability**: Works across different systems without modification
+
+## Environment Variables
+
+Defaults are set only if not already defined in your environment:
+
+```fish
+# Editor configuration
+set -q EDITOR; or set -gx EDITOR /usr/bin/nvim
+set -q VISUAL; or set -gx VISUAL nvim
+
+# Theme configuration
+set -q GTK_THEME; or set -gx GTK_THEME BreezeDark
+
+# Disable greeting
+set -q fish_greeting; or set fish_greeting ''
+```
+
+### Overriding Variables
+
+Set environment variables before Fish starts to customize:
+
+```bash
+# In your shell profile or systemd environment
+export EDITOR=helix
+export GTK_THEME=Adwaita-dark
+```
+
+## Path Management
+
+Binary paths are explicitly declared and conditionally added:
+
+```fish
+# User local binaries
+test -d $HOME/.local/bin; and fish_add_path $HOME/.local/bin
+
+# Bun runtime
+set -q BUN_INSTALL; or set -gx BUN_INSTALL "$HOME/.bun"
+test -d $BUN_INSTALL/bin; and fish_add_path $BUN_INSTALL/bin
+
+# OpenCode
+test -d $HOME/.opencode/bin; and fish_add_path $HOME/.opencode/bin
+```
+
+This ensures the configuration works even if certain tools aren't installed.
+
+## VI Key Bindings
+
+Fish is configured with VI keybindings in insert mode:
+
+```fish
+fish_vi_key_bindings insert
+set fish_cursor_default block
+set fish_cursor_visual block
+```
+
+### Navigation
+
+<Tabs>
+  <Tab title="Normal Mode">
+    - `h`, `j`, `k`, `l` - Move cursor
+    - `w`, `b` - Move by word
+    - `0`, `$` - Start/end of line
+    - `v` - Visual mode
+  </Tab>
+  <Tab title="Insert Mode">
+    - `Esc` - Return to normal mode
+    - `Ctrl+C` - Return to normal mode
+    - Regular typing
+  </Tab>
+</Tabs>
+
+## Tool Integrations
+
+Tools are initialized only if available:
+
+### Zoxide (Smart Directory Jumping)
+
+```fish
+type -q zoxide; and zoxide init fish | source
+```
+
+After initialization:
+- `z <directory>` - Jump to frecent directory
+- `zi` - Interactive directory search
+
+### Atuin (Shell History)
+
+```fish
+type -q atuin; and atuin init fish | source
+```
+
+Features:
+- Enhanced shell history
+- Sync across machines
+- Context-aware suggestions
+
+## Abbreviations
+
+Global abbreviations expand automatically:
+
+### Editor Shortcuts
+
+```fish
+abbr --add --global vi nvim
+abbr --add --global vim nvim
+```
+
+Typing `vi` expands to `nvim` when you press space or enter.
+
+### Git Shortcuts
+
+| Abbreviation | Expands To | Description |
+|--------------|------------|-------------|
+| `gits` | `git status` | Show status |
+| `gitc` | `git commit` | Commit changes |
+| `gita` | `git add` | Stage files |
+| `gitd` | `git diff` | Show diff |
+| `gitl` | `git log --oneline` | Compact log |
+| `gitp` | `git push` | Push commits |
+| `gitpl` | `git pull` | Pull changes |
+
+### System Shortcuts
+
+```fish
+abbr --add --global ll 'ls -la'
+```
+
+### Adding Custom Abbreviations
+
+Add to `~/.config/fish/config.fish` in the interactive section:
+
+```fish
+abbr --add --global dc 'docker-compose'
+abbr --add --global k 'kubectl'
+```
+
+## Aliases
+
+Permanent command replacements:
+
+```fish
+alias vim='nvim'
+```
+
+Unlike abbreviations, aliases don't show the expanded command.
+
+## Prompt Configuration
+
+Pure prompt colors can be customized via environment:
+
+```fish
+set -q PURE_COLOR_PRIMARY; or set -g pure_color_primary blue
+set -q PURE_COLOR_INFO; or set -g pure_color_info cyan
+set -q PURE_COLOR_MUTE; or set -g pure_color_mute white
+set -q PURE_COLOR_SUCCESS; or set -g pure_color_success green
+set -q PURE_COLOR_DANGER; or set -g pure_color_danger red
+set -q PURE_COLOR_WARNING; or set -g pure_color_warning yellow
+```
+
+### Customizing Prompt Colors
+
+Override in your environment:
+
+```fish
+set -Ux PURE_COLOR_PRIMARY magenta
+set -Ux PURE_COLOR_SUCCESS cyan
+```
+
+## Interactive Shell Detection
+
+All interactive features are wrapped in a check:
+
+```fish
+if status is-interactive
+    # VI keybindings
+    # Tool integrations
+    # Abbreviations
+    # Prompt config
+end
+```
+
+This ensures scripts run without loading interactive features.
+
+## Configuration Location
+
+Main config: `~/.config/fish/config.fish`
+
+### Additional Fish Directories
+
+- `~/.config/fish/functions/` - Custom functions
+- `~/.config/fish/conf.d/` - Additional config files
+- `~/.config/fish/completions/` - Custom completions
+
+## FAQ
+
+<Accordion title="How do I disable VI mode?">
+  Comment out the VI keybindings section:
+  
+  ```fish
+  # fish_vi_key_bindings insert
+  ```
+  
+  Or switch to default (Emacs) mode:
+  
+  ```fish
+  fish_default_key_bindings
+  ```
+</Accordion>
+
+<Accordion title="How do I add a custom function?">
+  Create a file in `~/.config/fish/functions/`:
+  
+  ```fish
+  # ~/.config/fish/functions/mkcd.fish
+  function mkcd
+      mkdir -p $argv[1]
+      cd $argv[1]
+  end
+  ```
+  
+  It will be auto-loaded when called.
+</Accordion>
+
+<Accordion title="Why aren't my abbreviations expanding?">
+  Abbreviations only work in interactive mode. Make sure:
+  
+  1. You're in an interactive shell (not a script)
+  2. The abbreviation is defined in the interactive block
+  3. You've reloaded Fish or started a new session
+</Accordion>
+
+<Accordion title="How do I install zoxide or atuin?">
+  The config gracefully handles missing tools. Install them separately:
+  
+  **Zoxide:**
+  ```bash
+  # Fedora
+  sudo dnf install zoxide
+  
+  # Or via cargo
+  cargo install zoxide
+  ```
+  
+  **Atuin:**
+  ```bash
+  # Via cargo
+  cargo install atuin
+  
+  # Or via package manager
+  bash <(curl https://raw.githubusercontent.com/atuinsh/atuin/main/install.sh)
+  ```
+</Accordion>
+
+## Related Configuration
+
+- See [Neovim](/config/neovim) for editor setup
+- See [Git](/config/git) for version control configuration
+- See [Tmux](/config/tmux) for terminal multiplexer settings

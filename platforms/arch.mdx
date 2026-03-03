@@ -1,0 +1,159 @@
+---
+title: Arch Linux Setup
+description: Installation and configuration guide for dotfiles on Arch Linux
+---
+
+## Initial Setup
+
+You can install the dotfiles using either the quick install script or manual method.
+
+### Quick Install (Single Command)
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/shawal-mbalire/root_home_shawal/main/install.sh | bash
+```
+
+### Manual Install
+
+```sh
+git clone https://github.com/shawal-mbalire/root_home_shawal
+rsync -avhu --progress root_home_shawal/ ~/
+```
+
+## Hyprland Installation
+
+Install Hyprland and essential utilities using `yay`.
+
+```sh
+yay -Syyu hyprland-git wofi drun
+```
+
+### Complete Hyprland Environment
+
+For a full setup with all components, you may want to install additional packages:
+
+```sh
+yay -S hyprland hyprlock hypridle hyprpaper
+```
+
+## Nerd Fonts
+
+Install Hack Nerd Font for terminal icons and glyphs.
+
+```sh
+yay -S ttf-hack-nerd
+```
+
+### Alternative: JetBrainsMono Nerd Font
+
+Download and install JetBrainsMono Nerd Font manually:
+
+```sh
+curl -OL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.tar.xz
+```
+
+Extract to `~/.local/share/fonts/` or `/usr/share/fonts/`.
+
+## Essential Packages
+
+Install commonly used tools and applications.
+
+### Terminal and Shell
+
+```sh
+yay -S fish kitty
+```
+
+### Window Manager Utilities
+
+```sh
+yay -S rofi waybar
+```
+
+### System Utilities
+
+```sh
+yay -S blueman pavucontrol nm-applet
+```
+
+### Development Tools
+
+```sh
+yay -S gh neovim
+```
+
+### File Management
+
+```sh
+yay -S exa nautilus
+```
+
+## Application Installations
+
+### Snaps
+
+```sh
+sudo snap install obsidian
+sudo snap install code --classic
+```
+
+### Flatpaks
+
+```sh
+flatpak install flathub io.github.zen_browser.zen
+```
+
+## Neovim Setup
+
+### Installing Packer (Plugin Manager)
+
+```sh
+git clone --depth 1 https://github.com/wbthomason/packer.nvim\
+ ~/.local/share/nvim/site/pack/packer/start/packer.nvim
+```
+
+### Vim Plug (Alternative)
+
+If you prefer Vim Plug over Packer:
+
+#### For Neovim
+
+```sh
+sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
+  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+```
+
+#### For Vim
+
+```sh
+curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
+  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+```
+
+## Tmux Setup
+
+Install Tmux Plugin Manager:
+
+```sh
+git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm
+```
+
+After installation, launch tmux and press `prefix + I` (capital i) to install plugins.
+
+## Using yay vs pacman
+
+- **pacman**: Official package manager for Arch Linux, installs packages from official repositories
+- **yay**: AUR (Arch User Repository) helper that can install both official and AUR packages
+- Use `yay` when you need AUR packages or want a unified interface
+- Use `sudo pacman -S` for official repository packages if you prefer
+
+### Installing yay
+
+If you don't have `yay` installed:
+
+```sh
+sudo pacman -S --needed git base-devel
+git clone https://aur.archlinux.org/yay.git
+cd yay
+makepkg -si
+```

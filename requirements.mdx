@@ -1,0 +1,428 @@
+---
+title: Requirements
+description: System requirements and dependencies for the dotfiles configuration
+---
+
+## System requirements
+
+This dotfiles configuration is designed for Linux systems running Wayland compositors, specifically Hyprland.
+
+### Supported distributions
+
+<CardGroup cols={2}>
+  <Card title="Fedora" icon="fedora">
+    Fully tested and documented with DNF package installation
+  </Card>
+  <Card title="Arch Linux" icon="arch-linux">
+    Supported with AUR packages via yay
+  </Card>
+</CardGroup>
+
+<Info>
+  Other distributions may work but require manual dependency resolution.
+</Info>
+
+### System prerequisites
+
+- **Display server**: Wayland (required for Hyprland)
+- **Shell**: Bash (for installation scripts) and Fish (runtime)
+- **Git**: For cloning the repository
+- **Disk space**: Approximately 500MB for all dependencies
+- **Internet connection**: Required for initial setup and package installation
+
+## Core dependencies
+
+These packages are essential for the dotfiles to function properly.
+
+### Hyprland ecosystem
+
+The window manager and its companion tools:
+
+<CodeGroup>
+```bash Fedora
+sudo dnf install hyprland hyprland-devel hyprlock hypridle hyprpaper hyprpolkitagent
+```
+
+```bash Arch
+yay -S hyprland-git hyprlock hypridle hyprpaper hyprpolkitagent
+```
+</CodeGroup>
+
+| Package | Purpose |
+|---------|--------|
+| `hyprland` | Dynamic tiling Wayland compositor |
+| `hyprlock` | Screen locker for Hyprland |
+| `hypridle` | Idle daemon (auto-lock, screen off) |
+| `hyprpaper` | Wallpaper utility |
+| `hyprpolkitagent` | Polkit authentication agent |
+
+### Shell and terminal
+
+<CodeGroup>
+```bash Fedora
+sudo dnf install fish kitty
+```
+
+```bash Arch
+pacman -S fish kitty
+```
+</CodeGroup>
+
+| Package | Purpose |
+|---------|--------|
+| `fish` | Friendly interactive shell with VI keybindings |
+| `kitty` | GPU-accelerated terminal emulator |
+
+### Status bar and system tray
+
+<CodeGroup>
+```bash Fedora
+sudo dnf install waybar nm-applet blueman pavucontrol
+```
+
+```bash Arch
+pacman -S waybar network-manager-applet blueman pavucontrol
+```
+</CodeGroup>
+
+| Package | Purpose |
+|---------|--------|
+| `waybar` | Highly customizable Wayland status bar |
+| `nm-applet` | NetworkManager system tray applet |
+| `blueman` | Bluetooth manager with tray applet |
+| `pavucontrol` | PulseAudio volume control |
+
+### Application launcher and utilities
+
+<CodeGroup>
+```bash Fedora
+sudo dnf install rofi mako gammastep
+```
+
+```bash Arch
+pacman -S rofi mako gammastep
+```
+</CodeGroup>
+
+| Package | Purpose |
+|---------|--------|
+| `rofi` | Application launcher and dmenu replacement |
+| `mako` | Lightweight Wayland notification daemon |
+| `gammastep` | Screen color temperature adjustment (Redshift for Wayland) |
+
+### Clipboard management
+
+<CodeGroup>
+```bash Fedora
+sudo dnf install wl-clipboard cliphist
+```
+
+```bash Arch
+pacman -S wl-clipboard cliphist
+```
+</CodeGroup>
+
+| Package | Purpose |
+|---------|--------|
+| `wl-clipboard` | Command-line Wayland clipboard utilities |
+| `cliphist` | Clipboard history manager |
+
+### Text editor
+
+<CodeGroup>
+```bash Fedora
+sudo dnf install neovim lua lua-devel luarocks go lua5.1
+```
+
+```bash Arch
+pacman -S neovim lua luarocks go
+```
+</CodeGroup>
+
+| Package | Purpose |
+|---------|--------|
+| `neovim` | Hyperextensible Vim-based text editor |
+| `lua`, `lua-devel` | Lua runtime and development files for Neovim plugins |
+| `luarocks` | Lua package manager |
+| `go` | Required for some Neovim LSP servers |
+
+<Tip>
+  The Neovim configuration uses LazyVim, which will auto-install plugins on first launch.
+</Tip>
+
+## Optional dependencies
+
+These packages enhance functionality but aren't strictly required.
+
+### Screenshots and screen recording
+
+<CodeGroup>
+```bash Fedora
+sudo dnf install grimblast
+```
+
+```bash Arch
+yay -S grimblast-git
+```
+</CodeGroup>
+
+| Package | Purpose |
+|---------|--------|
+| `grimblast` | Screenshot utility for Hyprland |
+
+### Media control
+
+<CodeGroup>
+```bash Fedora
+sudo dnf install playerctl brightnessctl
+```
+
+```bash Arch
+pacman -S playerctl brightnessctl
+```
+</CodeGroup>
+
+| Package | Purpose |
+|---------|--------|
+| `playerctl` | Media player control (MPRIS) |
+| `brightnessctl` | Backlight control for laptops |
+
+### File management
+
+<CodeGroup>
+```bash Fedora
+sudo dnf install nautilus exa
+```
+
+```bash Arch
+pacman -S nautilus exa
+```
+</CodeGroup>
+
+| Package | Purpose |
+|---------|--------|
+| `nautilus` | GNOME file manager |
+| `exa` | Modern replacement for ls (used in Fish config) |
+
+### Font packages
+
+Nerd Fonts are required for proper icon display in Waybar and terminal:
+
+<CodeGroup>
+```bash Fedora - Hack
+sudo dnf copr enable zawertun/hack-fonts
+sudo dnf install hack-fonts
+```
+
+```bash Arch - Hack
+yay -S ttf-hack-nerd
+```
+
+```bash JetBrainsMono (All distributions)
+curl -OL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.tar.xz
+mkdir -p ~/.local/share/fonts
+tar -xf JetBrainsMono.tar.xz -C ~/.local/share/fonts
+fc-cache -fv
+```
+</CodeGroup>
+
+<Warning>
+  Without Nerd Fonts, Waybar icons will not display correctly.
+</Warning>
+
+### Development tools
+
+<CodeGroup>
+```bash Fedora
+sudo dnf install gh flatpak
+```
+
+```bash Arch
+pacman -S github-cli flatpak
+```
+</CodeGroup>
+
+| Package | Purpose |
+|---------|--------|
+| `gh` | GitHub CLI for repository management |
+| `flatpak` | Application sandboxing and distribution |
+
+### Shell enhancements
+
+Optional tools that enhance the Fish shell experience:
+
+```bash
+# Install via their respective methods
+curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
+bash <(curl https://raw.githubusercontent.com/ellie/atuin/main/install.sh)
+```
+
+| Package | Purpose |
+|---------|--------|
+| `zoxide` | Smarter cd command (autojump) |
+| `atuin` | Magical shell history with sync |
+
+<Info>
+  The Fish configuration auto-detects and initializes these tools if installed.
+</Info>
+
+## Installation tools
+
+For managing the dotfiles installation:
+
+### GNU Stow (recommended)
+
+<CodeGroup>
+```bash Fedora
+sudo dnf install stow
+```
+
+```bash Arch
+pacman -S stow
+```
+</CodeGroup>
+
+GNU Stow creates symlinks for dotfile management, making updates easier.
+
+### Rsync (alternative)
+
+Most distributions include rsync by default. If not:
+
+<CodeGroup>
+```bash Fedora
+sudo dnf install rsync
+```
+
+```bash Arch
+pacman -S rsync
+```
+</CodeGroup>
+
+## Quick dependency installation
+
+Install all core dependencies with a single command:
+
+<CodeGroup>
+```bash Fedora - Full install
+sudo dnf install -y \
+  hyprland hyprland-devel hyprlock hypridle hyprpaper hyprpolkitagent \
+  fish kitty waybar nm-applet blueman pavucontrol \
+  rofi mako gammastep wl-clipboard cliphist \
+  neovim lua lua-devel luarocks go lua5.1 \
+  nautilus exa playerctl brightnessctl \
+  gh flatpak stow
+```
+
+```bash Arch - Full install
+yay -S --needed \
+  hyprland-git hyprlock hypridle hyprpaper hyprpolkitagent \
+  fish kitty waybar network-manager-applet blueman pavucontrol \
+  rofi mako gammastep wl-clipboard cliphist \
+  neovim lua luarocks go \
+  nautilus exa playerctl brightnessctl \
+  github-cli flatpak stow \
+  ttf-hack-nerd
+```
+</CodeGroup>
+
+## Verification
+
+After installing dependencies, verify core tools are available:
+
+```bash
+# Check Hyprland
+hyprland --version
+
+# Check Fish
+fish --version
+
+# Check Neovim
+nvim --version
+
+# Check Waybar
+waybar --version
+
+# Check Stow
+stow --version
+```
+
+All commands should return version information without errors.
+
+## Platform-specific notes
+
+### Fedora rawhide
+
+For a more rolling-release experience on Fedora:
+
+```bash
+# Upgrade to Rawhide (optional)
+sudo dnf system-upgrade download --releasever=rawhide
+sudo dnf system-upgrade reboot
+```
+
+<Warning>
+  Rawhide is Fedora's development branch. It's cutting-edge but may be unstable.
+</Warning>
+
+### Fedora COPR repositories
+
+Some packages require enabling COPR repositories:
+
+```bash
+# Hyprland ecosystem
+sudo dnf copr enable solopasha/hypr
+
+# Hack Nerd Fonts
+sudo dnf copr enable zawertun/hack-fonts
+
+# Obsidian (optional)
+sudo dnf copr enable alxhr0/Obsidian
+```
+
+### Arch AUR access
+
+Ensure you have an AUR helper installed:
+
+```bash
+# Install yay if not already installed
+git clone https://aur.archlinux.org/yay.git
+cd yay
+makepkg -si
+```
+
+## Hardware considerations
+
+### Graphics drivers
+
+Hyprland requires proper graphics drivers for Wayland:
+
+- **NVIDIA**: Use `nvidia-open` or `nvidia` proprietary drivers (515+)
+- **AMD**: Mesa drivers (included in most distributions)
+- **Intel**: Mesa drivers (included in most distributions)
+
+### Laptop-specific
+
+For laptop users, these additional packages are recommended:
+
+```bash
+# Fedora
+sudo dnf install power-profiles-daemon brightnessctl
+
+# Arch
+pacman -S power-profiles-daemon brightnessctl
+```
+
+The configuration includes a laptop variant (`hyprland-laptop.conf`) with appropriate display settings.
+
+## Next steps
+
+Once you've verified all requirements are met:
+
+<CardGroup cols={2}>
+  <Card title="Installation guide" icon="download" href="/installation">
+    Proceed with installing the dotfiles
+  </Card>
+  <Card title="Introduction" icon="house" href="/introduction">
+    Learn more about the project
+  </Card>
+</CardGroup>

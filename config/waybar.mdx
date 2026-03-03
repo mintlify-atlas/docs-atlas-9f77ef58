@@ -1,0 +1,408 @@
+---
+title: Waybar Configuration
+description: Catppuccin Mocha themed Waybar status bar with pill-style modules
+---
+
+## Overview
+
+This Waybar configuration features a Catppuccin Mocha color scheme with pill-style modules and 1px borders. It's designed to integrate seamlessly with the Hyprland window manager.
+
+## Installation
+
+### Fedora Dependencies
+
+```bash
+sudo dnf install waybar jetbrains-mono-fonts sono-fonts pavucontrol brightnessctl
+```
+
+### Optional Dependencies
+
+- **Screenshots**: `hyprshot`
+- **Terminal**: `foot`
+- **Network Manager**: `network-manager-applet` (for `nm-connection-editor`)
+- **Power Management**: `power-profiles-daemon`
+
+## Configuration Files
+
+Waybar uses two main files:
+
+- `~/.config/waybar/config.jsonc` - Module configuration and layout
+- `~/.config/waybar/style.css` - Styling and colors
+
+## Module Layout
+
+```json
+{
+  "layer": "top",
+  "position": "top",
+  "height": 24,
+  "modules-left": ["hyprland/workspaces", "hyprland/submap"],
+  "modules-center": ["clock"],
+  "modules-right": [
+    "custom/screenshot",
+    "custom/temp",
+    "network",
+    "power-profiles-daemon",
+    "pulseaudio",
+    "backlight",
+    "battery",
+    "tray"
+  ]
+}
+```
+
+## Modules
+
+### Workspaces
+
+```json
+"hyprland/workspaces": {
+  "disable-scroll": true,
+  "all-outputs": true,
+  "format": "{name}",
+  "on-click": "activate"
+}
+```
+
+Shows Hyprland workspaces with click-to-switch functionality.
+
+### Clock
+
+```json
+"clock": {
+  "format": "<span>󰥔</span> {:%H:%M}",
+  "format-alt": " {:%A, %B %d, %Y}",
+  "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+  "on-click": "right"
+}
+```
+
+Displays time by default, switches to date on right-click.
+
+### Battery
+
+```json
+"battery": {
+  "states": {
+    "good": 95,
+    "warning": 30,
+    "critical": 15
+  },
+  "format": "{capacity}% <span>{icon}</span>",
+  "format-charging": "{capacity}% <span>󰂄</span>",
+  "format-plugged": "{capacity}% <span>󰚥</span>",
+  "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
+}
+```
+
+Shows battery percentage with icons indicating charge level.
+
+### Network
+
+```json
+"network": {
+  "format-wifi": "<span></span>  {signalStrength}%",
+  "format-ethernet": "<span></span> {ifname}",
+  "format-disconnected": "Disconnected <span>⚠</span>",
+  "on-click": "nm-connection-editor"
+}
+```
+
+Click to open network manager.
+
+### Audio (PulseAudio)
+
+```json
+"pulseaudio": {
+  "format": "{volume}% <span>{icon}</span>",
+  "format-muted": "<span></span>",
+  "format-icons": {
+    "default": ["󰕿", "󰖀", "󰕾"]
+  },
+  "on-click": "pavucontrol"
+}
+```
+
+Click to open volume control.
+
+### Brightness
+
+```json
+"backlight": {
+  "device": "intel_backlight",
+  "format": "{percent}% <span>{icon}</span>",
+  "format-icons": ["󰃚", "󰃛", "󰃜", "󰃝", "󰃞", "󰃟", "󰃠", "󰃡"],
+  "on-scroll-up": "brightnessctl set 1%+",
+  "on-scroll-down": "brightnessctl set 1%-"
+}
+```
+
+Scroll to adjust brightness.
+
+### Power Profiles
+
+```json
+"power-profiles-daemon": {
+  "format": "{icon}",
+  "tooltip-format": "Power profile: {profile}\nDriver: {driver}",
+  "format-icons": {
+    "performance": "",
+    "balanced": "",
+    "power-saver": ""
+  },
+  "on-click": "~/.config/waybar/cycle-power-profile.sh"
+}
+```
+
+Click to cycle through power profiles.
+
+### Custom Modules
+
+<Tabs>
+  <Tab title="Screenshot">
+    ```json
+    "custom/screenshot": {
+      "format": "󰄄",
+      "on-click": "hyprshot -m region"
+    }
+    ```
+    
+    Click to take a screenshot of selected region.
+  </Tab>
+  <Tab title="Temperature">
+    ```json
+    "custom/temp": {
+      "format": "󰔏",
+      "on-click": "~/.config/waybar/toggle_temp.sh"
+    }
+    ```
+    
+    Custom temperature toggle script.
+  </Tab>
+</Tabs>
+
+## Catppuccin Mocha Theme
+
+### Color Palette
+
+```css
+@define-color base #1e1e2e;
+@define-color mantle #181825;
+@define-color crust #11111b;
+@define-color text #cdd6f4;
+@define-color subtext0 #a6adc8;
+@define-color surface0 #313244;
+@define-color surface1 #45475a;
+@define-color blue #89b4fa;
+@define-color lavender #b4befe;
+@define-color green #a6e3a1;
+@define-color yellow #f9e2af;
+@define-color red #f38ba8;
+@define-color mauve #cba6f7;
+```
+
+### Module Styling
+
+Modules use a pill-style design with rounded corners:
+
+```css
+.module {
+    background-color: @surface0;
+    border-radius: 5px;
+    border: 1px solid @surface1;
+    padding: 0 4px;
+    margin: 0 2px;
+}
+```
+
+### Workspace Buttons
+
+```css
+.ws-button {
+    border-radius: 5px;
+    background-color: transparent;
+    color: @subtext1;
+    transition: all 0.2s ease;
+}
+
+.ws-button:hover {
+    background-color: @surface1;
+    color: @text;
+}
+
+.ws-button.active {
+    background-color: @blue;
+    color: @base;
+}
+```
+
+## Reloading Waybar
+
+<Tabs>
+  <Tab title="Command Line">
+    ```bash
+    killall waybar && waybar &
+    ```
+  </Tab>
+  <Tab title="Hyprland Keybind">
+    Add to `~/.config/hypr/modules/keybindings.conf`:
+    
+    ```conf
+    bind = $mainMod, B, exec, $waybar_toggle
+    ```
+    
+    Default: `Super + B`
+  </Tab>
+</Tabs>
+
+## Customization
+
+### Adding a Module
+
+1. Add module to `config.jsonc`:
+
+```json
+"modules-right": [
+  "custom/my-module",
+  // ... other modules
+]
+```
+
+2. Configure the module:
+
+```json
+"custom/my-module": {
+  "format": "{}",
+  "exec": "~/.config/waybar/scripts/my-script.sh",
+  "interval": 5
+}
+```
+
+3. Style in `style.css`:
+
+```css
+#custom-my-module {
+    color: @green;
+}
+```
+
+### Changing Colors
+
+Modify color variables in `style.css`:
+
+```css
+@define-color blue #your-color;
+```
+
+### Adjusting Module Order
+
+Reorder arrays in `config.jsonc`:
+
+```json
+"modules-right": [
+  "battery",      // moved to front
+  "network",
+  // ...
+]
+```
+
+## Scripts
+
+### Toggle Waybar Script
+
+Referenced in Hyprland config:
+
+```bash
+#!/bin/bash
+# ~/.config/hypr/scripts/toggle_waybar.sh
+pkill waybar || waybar &
+```
+
+### Power Profile Cycle
+
+```bash
+#!/bin/bash
+# ~/.config/waybar/cycle-power-profile.sh
+current=$(powerprofilesctl get)
+
+case $current in
+  power-saver)
+    powerprofilesctl set balanced
+    ;;
+  balanced)
+    powerprofilesctl set performance
+    ;;
+  performance)
+    powerprofilesctl set power-saver
+    ;;
+esac
+```
+
+## FAQ
+
+<Accordion title="Waybar not showing?">
+  Check if Waybar is running:
+  
+  ```bash
+  ps aux | grep waybar
+  ```
+  
+  Start manually:
+  
+  ```bash
+  waybar
+  ```
+  
+  Check logs for errors:
+  
+  ```bash
+  waybar --log-level debug
+  ```
+</Accordion>
+
+<Accordion title="Icons not displaying?">
+  Install required fonts:
+  
+  ```bash
+  sudo dnf install jetbrains-mono-fonts font-awesome-fonts
+  ```
+  
+  Ensure the font supports Nerd Font icons.
+</Accordion>
+
+<Accordion title="How to change bar height?">
+  Edit `config.jsonc`:
+  
+  ```json
+  "height": 32,  // increase from 24
+  ```
+</Accordion>
+
+<Accordion title="Module not updating?">
+  For custom modules, check the `interval` setting:
+  
+  ```json
+  "custom/my-module": {
+    "interval": 5  // update every 5 seconds
+  }
+  ```
+  
+  Or use `"interval": "once"` for single execution.
+</Accordion>
+
+## Configuration Location
+
+```
+~/.config/waybar/
+├── config.jsonc
+├── style.css
+├── cycle-power-profile.sh
+├── toggle_temp.sh
+└── README.md
+```
+
+## Related Configuration
+
+- See [Hyprland](/config/hyprland) for window manager setup
+- See [Rofi](/config/rofi) for application launcher
+- See [Kitty](/config/kitty) for terminal configuration

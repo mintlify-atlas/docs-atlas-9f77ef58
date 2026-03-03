@@ -1,0 +1,308 @@
+---
+title: 'Keybindings'
+description: 'Customize keyboard shortcuts across Hyprland, Fish, and other tools'
+---
+
+## Overview
+
+This configuration uses **Super (Windows/Command key)** as the main modifier key. Fish shell is configured with VI mode keybindings for command-line editing.
+
+## Hyprland Keybindings
+
+### Application Launchers
+
+| Keybinding | Action | Application |
+|------------|--------|-------------|
+| `Super + Shift + Return` | Launch terminal | Kitty |
+| `Super + P` | Application launcher | Rofi |
+| `Super + E` | File manager | Nautilus |
+| `Super + Shift + N` | Code editor | VS Code Insiders |
+| `Super + Shift + O` | Note taker | Obsidian |
+| `Super + Shift + P` | Web browser | Zen Browser |
+
+### Window Management
+
+| Keybinding | Action |
+|------------|--------|
+| `Super + Shift + C` | Kill active window |
+| `Super + Shift + Q` | Exit Hyprland |
+| `Super + Alt + F` | Toggle floating mode |
+| `Super + Shift + T` | Toggle split direction |
+| `Super + R` | Pseudo tile mode |
+| `Alt + Tab` | Focus current or last window |
+
+### Window Focus (VI-style)
+
+| Keybinding | Direction |
+|------------|----------|
+| `Super + H` | Focus up |
+| `Super + J` | Focus right |
+| `Super + G` | Focus down |
+| `Super + F` | Focus left |
+
+### Window Movement
+
+| Keybinding | Direction |
+|------------|----------|
+| `Super + Shift + H` | Move window up |
+| `Super + Shift + J` | Move window right |
+| `Super + Shift + G` | Move window down |
+| `Super + Shift + F` | Move window left |
+
+### Window Resizing
+
+| Keybinding | Action |
+|------------|--------|
+| `Super + Ctrl + H` | Resize left (-20px) |
+| `Super + Ctrl + L` | Resize right (+20px) |
+| `Super + Ctrl + K` | Resize up (-20px) |
+| `Super + Ctrl + J` | Resize down (+20px) |
+
+### Workspaces
+
+**Switch to workspace:**
+- `Super + [1-9,0]` - Switch to workspace 1-10
+
+**Move window to workspace:**
+- `Super + Shift + [1-9,0]` - Move active window to workspace 1-10
+
+**Special workspace (scratchpad):**
+- `Super + S` - Toggle scratchpad visibility
+- `Super + Shift + S` - Move window to scratchpad
+
+**Navigate workspaces:**
+- `Super + Mouse Wheel Up` - Next workspace
+- `Super + Mouse Wheel Down` - Previous workspace
+
+### Multi-Monitor
+
+| Keybinding | Action |
+|------------|--------|
+| `Super + Alt + F` | Move workspace to left monitor |
+| `Super + Alt + J` | Move workspace to right monitor |
+| `Super + Alt + H` | Move workspace to monitor above |
+| `Super + Alt + G` | Move workspace to monitor below |
+
+### System Controls
+
+| Keybinding | Action |
+|------------|--------|
+| `Super + V` | Clipboard history (Rofi) |
+| `Super + Shift + V` | Volume control (pavucontrol) |
+| `Super + B` | Toggle Waybar visibility |
+| `Print` | Screenshot (area select) |
+
+### Media Keys
+
+| Key | Action |
+|-----|--------|
+| `XF86AudioRaiseVolume` | Volume up 5% |
+| `XF86AudioLowerVolume` | Volume down 5% |
+| `XF86AudioMute` | Toggle mute |
+| `XF86AudioMicMute` | Toggle mic mute |
+| `XF86MonBrightnessUp` | Brightness up 10% |
+| `XF86MonBrightnessDown` | Brightness down 10% |
+| `XF86AudioNext` | Next track |
+| `XF86AudioPrev` | Previous track |
+| `XF86AudioPlay/Pause` | Play/pause |
+
+### Mouse Bindings
+
+| Binding | Action |
+|---------|--------|
+| `Super + Left Click + Drag` | Move window |
+| `Super + Right Click + Drag` | Resize window |
+
+## Customizing Hyprland Keybindings
+
+### Location
+`~/.config/hypr/modules/keybindings.conf`
+
+### Syntax
+
+```conf
+bind = MODIFIERS, KEY, ACTION, PARAMETERS
+bindm = MODIFIERS, MOUSE_BUTTON, ACTION  # Mouse bindings
+bindel = KEY, ACTION, PARAMETERS         # Repeat on hold
+bindl = KEY, ACTION, PARAMETERS          # Works when locked
+```
+
+### Examples
+
+**Launch an application:**
+```conf
+bind = $mainMod SHIFT, RETURN, exec, kitty
+bind = $mainMod, B, exec, firefox
+```
+
+**Window actions:**
+```conf
+bind = $mainMod, F, fullscreen,
+bind = $mainMod SHIFT, C, killactive,
+bind = $mainMod, SPACE, togglefloating,
+```
+
+**Custom resize amount:**
+```conf
+# Resize by 50px instead of 20px
+bind = $mainMod CTRL, H, resizeactive, -50 0
+bind = $mainMod CTRL, L, resizeactive, 50 0
+```
+
+**Change main modifier:**
+```conf
+# In hyprland.conf
+$mainMod = ALT  # Use Alt instead of Super
+```
+
+### Available Modifiers
+
+- `SUPER` / `SUPER_L` / `SUPER_R` - Windows/Command key
+- `ALT` / `ALT_L` / `ALT_R` - Alt key
+- `CTRL` / `CONTROL` - Control key
+- `SHIFT` - Shift key
+
+Combine with spaces: `SUPER SHIFT`, `CTRL ALT`
+
+### Disabling Keybindings
+
+Comment out lines with `#`:
+```conf
+# bind = $mainMod, E, exec, $fileManager
+```
+
+## Fish Shell Keybindings
+
+### VI Mode
+
+The configuration uses **VI keybindings** in insert mode:
+
+```fish
+# In ~/.config/fish/config.fish
+fish_vi_key_bindings insert
+```
+
+### VI Mode Keys
+
+**Normal mode (press Esc in command line):**
+
+| Key | Action |
+|-----|--------|
+| `h` | Move cursor left |
+| `l` | Move cursor right |
+| `b` | Move word backward |
+| `w` | Move word forward |
+| `0` | Move to line start |
+| `$` | Move to line end |
+| `dd` | Delete line |
+| `d$` | Delete to end of line |
+| `dw` | Delete word |
+| `i` | Enter insert mode |
+| `a` | Enter insert mode (after cursor) |
+| `A` | Enter insert mode (end of line) |
+| `v` | Visual mode |
+| `/` | Search command history |
+
+**Insert mode (default):**
+- Type normally
+- Press `Esc` to enter normal mode
+- `Ctrl + C` - Cancel current line
+- `Ctrl + D` - Exit shell
+
+### Switching to Emacs Mode
+
+For traditional bash-style keybindings:
+
+```fish
+# In ~/.config/fish/config.fish
+# Replace this line:
+fish_vi_key_bindings insert
+
+# With this:
+fish_default_key_bindings
+```
+
+### Custom Fish Keybindings
+
+Create custom bindings in `config.fish`:
+
+```fish
+# Insert mode binding
+bind -M insert \cf forward-word  # Ctrl+F to jump forward
+
+# Normal mode binding  
+bind -M default \cg end-of-line  # Ctrl+G to end of line
+```
+
+### Fish Cursor Style
+
+Customize cursor appearance:
+
+```fish
+# In config.fish
+set fish_cursor_default block     # Normal mode: block
+set fish_cursor_insert line       # Insert mode: line
+set fish_cursor_visual underscore # Visual mode: underscore
+set fish_cursor_replace_one underscore
+```
+
+## Tool Integration Keybindings
+
+### Tmux
+
+If using tmux with this configuration, you may want to coordinate prefix keys:
+
+```bash
+# Check current tmux prefix
+tmux show-options -g prefix
+```
+
+### Neovim
+
+Neovim keybindings are separate and configured in `~/.config/nvim/`. VI mode in Fish provides consistent muscle memory.
+
+## Quick Reference Card
+
+### Most Used Keybindings
+
+```
+Super + Shift + Return  →  Terminal
+Super + P               →  App Launcher  
+Super + Shift + C       →  Close Window
+Super + [1-9]          →  Switch Workspace
+Super + H/J/G/F        →  Navigate Windows (VI-style)
+Alt + Tab              →  Last Window
+Print                  →  Screenshot
+```
+
+### Adding to Your Setup
+
+1. **Edit keybindings:** `~/.config/hypr/modules/keybindings.conf`
+2. **Reload Hyprland:** `Super + Shift + Q` (logout) then log back in, or reload config
+3. **Test binding:** Try your new keybinding
+4. **Check conflicts:** Make sure your new binding doesn't conflict with existing ones
+
+## Troubleshooting
+
+### Keybinding Not Working
+
+1. Check for conflicts with other bindings
+2. Verify the application is installed:
+   ```bash
+   which kitty  # Or whatever app you're launching
+   ```
+3. Test the command directly:
+   ```bash
+   kitty  # Should launch the terminal
+   ```
+4. Check Hyprland logs:
+   ```bash
+   hyprctl logs
+   ```
+
+### Finding Key Names
+
+Run `wev` or `xev` to see key names as you press them:
+```bash
+wev  # Wayland event viewer
+```

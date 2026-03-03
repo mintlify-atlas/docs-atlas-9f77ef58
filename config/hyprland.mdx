@@ -1,0 +1,284 @@
+---
+title: Hyprland Configuration
+description: Modular Hyprland window manager configuration using 12-factor design principles
+---
+
+## Overview
+
+This Hyprland configuration is structured like a 12-factor application for portability and maintainability. The base `hyprland.conf` defines variables and sources modular config files, making it easy to customize and adapt to different environments.
+
+## Configuration Structure
+
+The configuration is split into focused modules:
+
+- `hyprland.conf` - Main config with variable definitions and module imports
+- `modules/displays.conf` - Monitor settings
+- `modules/autostart.conf` - Startup processes
+- `modules/env.conf` - Environment variables
+- `modules/look.conf` - Appearance (general, decoration, animations)
+- `modules/input.conf` - Input devices (keyboard, mouse, touchpad)
+- `modules/keybindings.conf` - Key bindings
+- `modules/windows.conf` - Window and workspace rules
+- `modules/hyprlock.conf` - Lock screen configuration
+- `modules/hyprpaper.conf` - Wallpaper settings
+
+## Variables System
+
+All customization is done through variables defined at the top of `hyprland.conf`. This makes it easy to change settings without hunting through multiple files.
+
+### Program Variables
+
+```conf
+$terminal = kitty
+$browser = flatpak run app.zen_browser.zen
+$note_taker = obsidian
+$code_editor = code-insiders
+$fileManager = nautilus
+$menu = rofi -show drun -theme launchers/gridmenu -drun-icon-theme "BeautySolar"
+$mainMod = SUPER
+```
+
+### Theme Variables
+
+```conf
+# Colors (Catppuccin-inspired)
+$active_border_color = rgba(89b4faff) rgba(89dcebee) 90deg
+$inactive_border_color = rgba(45475aee)
+$shadow_color = rgba(1a1a1aee)
+$blur_vibrancy = 0.1696
+
+# Sizes and gaps
+$gaps_in = 0
+$gaps_out = 0
+$border_size = 1
+$rounding = 3
+$shadow_range = 4
+$blur_size = 3
+```
+
+### Monitor Configuration
+
+```conf
+$primary_monitor = eDP-1,1920x1200@60,0x0,1
+$secondary_monitor = HDMI-A-2,1600x900@60,1921x0,1
+```
+
+### Input Configuration
+
+```conf
+$kb_layout = gb,ara
+$mouse_sensitivity = 0
+$touchpad_natural_scroll = false
+$device_sensitivity = -0.5
+```
+
+## Key Bindings
+
+### Application Launchers
+
+| Keybinding | Action |
+|------------|--------|
+| `Super + Shift + Return` | Launch terminal |
+| `Super + P` | Open application menu (Rofi) |
+| `Super + Shift + P` | Launch browser |
+| `Super + Shift + O` | Open note taker (Obsidian) |
+| `Super + Shift + I` | Launch code editor |
+| `Super + E` | Open file manager |
+
+### Window Management
+
+| Keybinding | Action |
+|------------|--------|
+| `Super + Shift + C` | Kill active window |
+| `Super + Shift + Q` | Exit Hyprland |
+| `Super + Alt + F` | Toggle floating mode |
+| `Super + R` | Pseudo mode (dwindle) |
+| `Super + Shift + T` | Toggle split (dwindle) |
+| `Alt + Tab` | Focus current or last window |
+
+### Focus Navigation
+
+```conf
+# Vi-style navigation
+Super + F  # Focus left
+Super + J  # Focus right
+Super + H  # Focus up
+Super + G  # Focus down
+```
+
+### Window Movement
+
+```conf
+Super + Shift + F  # Move window left
+Super + Shift + J  # Move window right
+Super + Shift + H  # Move window up
+Super + Shift + G  # Move window down
+```
+
+### Window Resizing
+
+```conf
+Super + Ctrl + H  # Resize left (-20px)
+Super + Ctrl + L  # Resize right (+20px)
+Super + Ctrl + K  # Resize up (-20px)
+Super + Ctrl + J  # Resize down (+20px)
+```
+
+### Workspace Management
+
+```conf
+# Switch to workspace
+Super + [1-9,0]  # Switch to workspace 1-10
+
+# Move window to workspace
+Super + Shift + [1-9,0]  # Move to workspace 1-10
+
+# Scratchpad
+Super + S        # Toggle special workspace
+Super + Shift + S  # Move to special workspace
+```
+
+### System Controls
+
+| Keybinding | Action |
+|------------|--------|
+| `Print` | Screenshot area (grimblast) |
+| `Super + V` | Clipboard history (cliphist) |
+| `Super + Shift + V` | Volume control (pavucontrol) |
+| `Super + B` | Toggle waybar |
+| `XF86AudioRaiseVolume` | Increase volume 5% |
+| `XF86AudioLowerVolume` | Decrease volume 5% |
+| `XF86AudioMute` | Toggle audio mute |
+| `XF86MonBrightnessUp` | Increase brightness 10% |
+| `XF86MonBrightnessDown` | Decrease brightness 10% |
+
+## Animations
+
+The configuration uses custom bezier curves for smooth animations:
+
+```conf
+# Bezier curves
+$bezier_easeOutQuint = 0.23,1,0.32,1
+$bezier_easeInOutCubic = 0.65,0.05,0.36,1
+$bezier_linear = 0,0,1,1
+$bezier_almostLinear = 0.5,0.5,0.75,1.0
+$bezier_quick = 0.15,0,0.1,1
+```
+
+Animations are applied to windows, layers, and workspaces with timing values defined in variables.
+
+## Input Configuration
+
+The input module configures keyboard layout and device settings:
+
+```conf
+input {
+    kb_layout = $kb_layout
+    kb_options = caps:swapescape, grp:win_space_toggle
+    follow_mouse = 1
+    sensitivity = $mouse_sensitivity
+
+    touchpad {
+        natural_scroll = $touchpad_natural_scroll
+    }
+}
+```
+
+### Keyboard Options
+
+- **Caps Lock → Escape**: Swap Caps Lock with Escape
+- **Layout Toggle**: `Win + Space` to switch between layouts
+
+## Environment Variables
+
+```conf
+env = HYPRCURSOR_THEME,Breeze
+env = XCURSOR_THEME,Breeze
+env = XCURSOR_SIZE,24
+env = HYPRCURSOR_SIZE,24
+```
+
+## Managing Configuration
+
+### Editing Configuration
+
+1. Edit variables in `~/.config/hypr/hyprland.conf`
+2. Modify sourced module files as needed
+3. All changes are git-tracked for version control
+
+### Validating Configuration
+
+```bash
+hyprland --config ~/.config/hypr/hyprland.conf --verify-config
+```
+
+### Applying Changes
+
+<Tabs>
+  <Tab title="Reload">
+    ```bash
+    hyprctl reload
+    ```
+  </Tab>
+  <Tab title="Restart">
+    Log out and log back in to Hyprland
+  </Tab>
+</Tabs>
+
+## Multiple Environments
+
+For different setups (e.g., laptop vs desktop):
+
+1. Copy `hyprland.conf` to `hyprland-laptop.conf`
+2. Edit variables and module sources for that environment
+3. Point Hyprland to the appropriate config via symlink or startup command
+
+Example laptop variant is provided at `modules/hyprland-laptop.conf`.
+
+## FAQ
+
+<Accordion title="How do I change my terminal?">
+  Edit the `$terminal` variable in `hyprland.conf`:
+  
+  ```conf
+  $terminal = alacritty  # or foot, wezterm, etc.
+  ```
+  
+  Then reload: `hyprctl reload`
+</Accordion>
+
+<Accordion title="How do I add a new keybinding?">
+  Add it to `modules/keybindings.conf`:
+  
+  ```conf
+  bind = $mainMod, T, exec, thunar
+  ```
+  
+  See the [Hyprland binds documentation](https://wiki.hyprland.org/Configuring/Binds/) for syntax.
+</Accordion>
+
+<Accordion title="How do I configure multiple monitors?">
+  Edit monitor variables in `hyprland.conf` or modify `modules/displays.conf` directly:
+  
+  ```conf
+  monitor = DP-1,2560x1440@144,0x0,1
+  monitor = HDMI-A-1,1920x1080@60,2560x0,1
+  ```
+</Accordion>
+
+<Accordion title="Where are window rules defined?">
+  Window and workspace rules are in `modules/windows.conf`. Example:
+  
+  ```conf
+  windowrule = workspace 2, class:^(zen)$
+  windowrule = float, class:^(pavucontrol)$
+  ```
+</Accordion>
+
+## Related Files
+
+Location: `~/.config/hypr/`
+
+- See [Waybar](/config/waybar) for status bar configuration
+- See [Rofi](/config/rofi) for application launcher theming
+- See [Kitty](/config/kitty) for terminal configuration

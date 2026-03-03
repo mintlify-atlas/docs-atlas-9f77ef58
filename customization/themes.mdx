@@ -1,0 +1,248 @@
+---
+title: 'Theme Customization'
+description: 'Customize colors, themes, and visual appearance across your system'
+---
+
+## Overview
+
+This dotfiles configuration uses the **Catppuccin Mocha** color scheme as its primary theme, providing a cohesive dark theme across Waybar, Hyprland, and GTK applications.
+
+## Catppuccin Mocha Color Palette
+
+The Waybar configuration uses the complete Catppuccin Mocha palette:
+
+### Base Colors
+```css
+@define-color base #1e1e2e;      /* Main background */
+@define-color mantle #181825;    /* Darker background */
+@define-color crust #11111b;     /* Darkest background */
+@define-color text #cdd6f4;      /* Primary text */
+@define-color subtext0 #a6adc8;  /* Secondary text */
+@define-color subtext1 #bac2de;  /* Tertiary text */
+```
+
+### Accent Colors
+```css
+@define-color blue #89b4fa;
+@define-color lavender #b4befe;
+@define-color sapphire #74c7ec;
+@define-color sky #89dceb;
+@define-color teal #94e2d5;
+@define-color green #a6e3a1;
+@define-color yellow #f9e2af;
+@define-color peach #fab387;
+@define-color maroon #eba0ac;
+@define-color red #f38ba8;
+@define-color mauve #cba6f7;
+@define-color pink #f5c2e7;
+@define-color flamingo #f2cdcd;
+```
+
+## Customizing Waybar Colors
+
+### Location
+Edit `~/.config/waybar/style.css`
+
+### Module Colors
+
+Each Waybar module has a designated color. To customize:
+
+```css
+/* Clock - currently peach */
+#clock {
+    color: @peach;  /* Change to any color variable */
+    font-weight: bold;
+}
+
+/* Battery - currently green */
+#battery {
+    color: @green;  /* Change color here */
+}
+
+/* CPU - currently blue */
+#cpu {
+    color: @blue;
+}
+
+/* Memory - currently mauve */
+#memory {
+    color: @mauve;
+}
+```
+
+### Creating Custom Color Schemes
+
+To use a different theme entirely:
+
+1. Replace the color definitions at the top of `style.css`:
+```css
+/* Your custom palette */
+@define-color base #yourcolor;
+@define-color text #yourcolor;
+/* ... etc */
+```
+
+2. The entire interface will update automatically since all modules reference these variables
+
+### Workspace Button Styling
+
+```css
+#workspaces button.focused,
+#workspaces button.active {
+    background-color: @blue;  /* Active workspace color */
+    color: @base;
+}
+
+#workspaces button.urgent {
+    background-color: @red;   /* Urgent workspace color */
+    color: @base;
+}
+```
+
+## GTK Theme Settings
+
+### Current Theme
+The configuration uses **BreezeDark** as the GTK theme:
+
+```fish
+# In ~/.config/fish/config.fish
+set -gx GTK_THEME BreezeDark
+```
+
+### Changing GTK Theme
+
+To use a different GTK theme:
+
+1. Install your preferred theme (e.g., `Adwaita-dark`, `Arc-Dark`, etc.)
+2. Update the environment variable:
+   ```fish
+   set -gx GTK_THEME YourThemeName
+   ```
+3. Restart your session or reload Fish configuration
+
+### Making it Permanent
+
+The theme is set in `~/.config/fish/config.fish`, so it persists across sessions.
+
+## Hyprland Appearance
+
+### Border Colors
+
+Edit `~/.config/hypr/hyprland.conf`:
+
+```conf
+# Active window border - blue to sky gradient
+$active_border_color = rgba(89b4faff) rgba(89dcebee) 90deg
+
+# Inactive window border - surface gray
+$inactive_border_color = rgba(45475aee)
+```
+
+You can:
+- Use solid colors: `rgba(89b4faff)`
+- Create gradients: `rgba(color1) rgba(color2) angle`
+- Adjust transparency with the alpha channel (last 2 digits)
+
+### Visual Effects
+
+In `~/.config/hypr/modules/look.conf`:
+
+```conf
+general {
+    gaps_in = $gaps_in      # Inner gaps (default: 0)
+    gaps_out = $gaps_out    # Outer gaps (default: 0)
+    border_size = $border_size  # Border width (default: 1)
+}
+
+decoration {
+    rounding = $rounding    # Corner rounding (default: 3)
+    
+    active_opacity = 1.0    # Focused window opacity
+    inactive_opacity = 1.0  # Unfocused window opacity
+    
+    shadow {
+        enabled = true
+        range = $shadow_range  # Shadow size (default: 4)
+        color = $shadow_color  # rgba(1a1a1aee)
+    }
+    
+    blur {
+        enabled = true
+        size = $blur_size      # Blur radius (default: 3)
+        vibrancy = $blur_vibrancy  # Blur intensity (default: 0.1696)
+    }
+}
+```
+
+### Customizing Visual Settings
+
+Edit the variables in `hyprland.conf`:
+
+```conf
+# Sizes and gaps
+$gaps_in = 5        # Add inner spacing
+$gaps_out = 10      # Add outer spacing
+$border_size = 2    # Thicker borders
+$rounding = 10      # More rounded corners
+$shadow_range = 8   # Larger shadows
+$blur_size = 5      # Stronger blur
+```
+
+## Animation Customization
+
+Hyprland uses bezier curves for smooth animations:
+
+```conf
+# Available bezier presets
+bezier = easeOutQuint, 0.23,1,0.32,1
+bezier = easeInOutCubic, 0.65,0.05,0.36,1
+bezier = linear, 0,0,1,1
+bezier = quick, 0.15,0,0.1,1
+```
+
+Customize animation timings in `hyprland.conf`:
+
+```conf
+animation = windows, 1, 4.79, easeOutQuint
+#           ↑     ↑    ↑       ↑
+#           |     |    |       └─ Bezier curve
+#           |     |    └───────── Duration (ms × 10)
+#           |     └────────────── Speed multiplier
+#           └──────────────────── Enable (1) / Disable (0)
+```
+
+## Quick Theme Tweaks
+
+### Make Everything Brighter
+```conf
+# In hyprland.conf
+$active_border_color = rgba(cba6f7ff) rgba(f5c2e7ff) 90deg  # Mauve to pink
+```
+
+### Minimal Look (No Gaps, No Rounding)
+```conf
+$gaps_in = 0
+$gaps_out = 0
+$rounding = 0
+$border_size = 1
+```
+
+### Maximize Visual Effects
+```conf
+$gaps_in = 8
+$gaps_out = 16
+$border_size = 3
+$rounding = 12
+$shadow_range = 12
+$blur_size = 8
+```
+
+## Color Reference
+
+For Catppuccin variants:
+- **Mocha** (current): Dark, warm theme
+- **Macchiato**: Slightly lighter than Mocha
+- **Frappe**: Medium dark theme
+- **Latte**: Light theme
+
+Visit [catppuccin.com](https://catppuccin.com) for complete color palettes of all variants.

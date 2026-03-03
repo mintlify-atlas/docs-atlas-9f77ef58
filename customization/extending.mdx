@@ -1,0 +1,521 @@
+---
+title: 'Extending the Configuration'
+description: 'Learn how to add new modules, functions, and customize the dotfiles structure'
+---
+
+## Overview
+
+This dotfiles configuration follows a **modular, 12-factor design philosophy**, making it easy to extend, customize, and maintain. All components are designed to be portable, configurable via environment variables, and version-controlled.
+
+## Design Philosophy
+
+### 12-Factor Configuration
+
+The configuration implements 12-factor app principles:
+
+```fish
+# From ~/.config/fish/config.fish
+
+# 1. Configuration via environment variables
+set -q EDITOR; or set -gx EDITOR /usr/bin/nvim
+set -q GTK_THEME; or set -gx GTK_THEME BreezeDark
+
+# 2. Explicit dependency declarations  
+test -d $HOME/.local/bin; and fish_add_path $HOME/.local/bin
+
+# 3. Portable across environments
+type -q zoxide; and zoxide init fish | source
+```
+
+**Key benefits:**
+- **Config:** All settings via environment variables
+- **Dependencies:** Explicit path management
+- **Dev/Prod Parity:** Same config across machines
+- **Portability:** Works on any Linux distribution
+
+## Modular Structure
+
+### Hyprland Modules
+
+Hyprland configuration is split into focused modules:
+
+```
+~/.config/hypr/
+├── hyprland.conf          # Main config + variables
+└── modules/
+    ├── autostart.conf     # Startup applications
+    ├── displays.conf      # Monitor configuration
+    ├── env.conf           # Environment variables
+    ├── input.conf         # Keyboard/mouse settings
+    ├── keybindings.conf   # All keybindings
+    ├── look.conf          # Appearance/animations
+    └── windows.conf       # Window rules
+```
+
+**Loading modules:**
+```conf
+# In hyprland.conf
+source = modules/displays.conf
+source = modules/autostart.conf
+source = modules/keybindings.conf
+# ... etc
+```
+
+### Benefits of Modular Design
+
+1. **Focused editing** - Only touch relevant files
+2. **Easy backup** - Back up specific modules
+3. **Shareable** - Share keybindings without sharing everything
+4. **Maintainable** - Clear organization
+5. **Conflict-free** - Multiple people can edit different modules
+
+## Adding New Hyprland Modules
+
+### Step 1: Create Module File
+
+```bash
+# Create a new module for workspace rules
+touch ~/.config/hypr/modules/workspaces.conf
+```
+
+### Step 2: Add Configuration
+
+```conf
+# In modules/workspaces.conf
+
+########################
+### WORKSPACE RULES ###
+########################
+
+# Pin applications to specific workspaces
+windowrulev2 = workspace 1, class:^(kitty)$
+windowrulev2 = workspace 2, class:^(firefox)$
+windowrulev2 = workspace 3, class:^(Code)$
+
+# Make certain workspaces use gaps
+workspace = 1, gapsout:10, gapsin:5
+workspace = 2, gapsout:0, gapsin:0
+```
+
+### Step 3: Source Module
+
+```conf
+# In hyprland.conf
+source = modules/workspaces.conf
+```
+
+### Step 4: Reload Configuration
+
+```bash
+# Reload Hyprland (or log out and back in)
+hyprctl reload
+```
+
+## Extending Fish Configuration
+
+### Adding Functions
+
+**Create a new function file:**
+
+```bash
+# Fish functions are auto-loaded from this directory
+vim ~/.config/fish/functions/my_function.fish
+```
+
+**Example function:**
+
+```fish
+# ~/.config/fish/functions/mkcd.fish
+function mkcd --description "Create directory and cd into it"
+    mkdir -p $argv[1]
+    and cd $argv[1]
+end
+```
+
+**Usage:**
+```bash
+mkcd ~/new/project/directory
+```
+
+### Adding Abbreviations
+
+**Edit config.fish:**
+
+```fish
+# In ~/.config/fish/config.fish, in the interactive section
+if status is-interactive
+    # Your custom abbreviations
+    abbr --add --global gc 'git commit -m'
+    abbr --add --global gco 'git checkout'
+    abbr --add --global gp 'git push origin'
+    abbr --add --global k 'kubectl'
+    abbr --add --global d 'docker'
+    abbr --add --global dc 'docker-compose'
+end
+```
+
+**Reload Fish:**
+```bash
+source ~/.config/fish/config.fish
+```
+
+### Adding Environment Variables
+
+**12-factor way (with defaults):**
+
+```fish
+# In config.fish
+
+# Set only if not already defined
+set -q MY_APP_HOME; or set -gx MY_APP_HOME "$HOME/myapp"
+set -q MY_API_KEY; or set -gx MY_API_KEY "default-key"
+
+# Add to PATH if directory exists
+test -d $MY_APP_HOME/bin; and fish_add_path $MY_APP_HOME/bin
+```
+
+**Override externally:**
+```bash
+# In your shell or ~/.profile
+export MY_API_KEY="production-key-123"
+```
+
+### Tool Integrations
+
+**Adding new tool initialization:**
+
+```fish
+# In config.fish, interactive section
+if status is-interactive
+    # Check if tool exists before initializing
+    type -q starship; and starship init fish | source
+    type -q direnv; and direnv hook fish | source
+    type -q mise; and mise activate fish | source
+end
+```
+
+## Creating Custom Modules
+
+### Example: Custom Waybar Module
+
+**1. Create script:**
+
+```bash
+# ~/.config/hypr/scripts/custom_module.sh
+#!/bin/bash
+
+# Output JSON for Waybar
+echo '{"text": "📊 Data", "tooltip": "Custom module", "class": "custom"}'
+```
+
+```bash
+chmod +x ~/.config/hypr/scripts/custom_module.sh
+```
+
+**2. Add to Waybar config:**
+
+```json
+// In ~/.config/waybar/config
+"modules-right": [
+    "custom/mymodule",
+    "clock"
+],
+
+"custom/mymodule": {
+    "exec": "~/.config/hypr/scripts/custom_module.sh",
+    "interval": 10,
+    "return-type": "json"
+}
+```
+
+**3. Style it:**
+
+```css
+/* In ~/.config/waybar/style.css */
+#custom-mymodule {
+    color: @blue;
+    font-weight: bold;
+}
+```
+
+### Example: Custom Rofi Menu
+
+**Create script:**
+
+```bash
+# ~/.config/rofi/scripts/system-menu.sh
+#!/bin/bash
+
+options="Shutdown\nReboot\nLogout\nSuspend"
+
+chosen=$(echo -e "$options" | rofi -dmenu -p "System")
+
+case $chosen in
+    Shutdown)
+        systemctl poweroff
+        ;;
+    Reboot)
+        systemctl reboot
+        ;;
+    Logout)
+        hyprctl dispatch exit
+        ;;
+    Suspend)
+        systemctl suspend
+        ;;
+esac
+```
+
+**Add keybinding:**
+
+```conf
+# In modules/keybindings.conf
+bind = $mainMod SHIFT, X, exec, ~/.config/rofi/scripts/system-menu.sh
+```
+
+## Version Control Best Practices
+
+### What to Commit
+
+**DO commit:**
+- Configuration files
+- Scripts and functions
+- Theme files
+- Documentation
+- Font configurations
+- Keybinding definitions
+
+**DON'T commit:**
+- Cache files (`.cache/`)
+- Secret keys or tokens
+- Machine-specific absolute paths
+- Large binary files
+- IDE project files (unless dotfiles-related)
+
+### Using .gitignore
+
+```gitignore
+# In ~/.gitignore or specific config dirs
+
+# Cache
+.cache/
+*.cache
+
+# Secrets
+.env
+*_secret
+*_token
+credentials.json
+
+# Machine-specific
+.uuid
+
+# History/State
+fish_history
+.fish_history
+atuin-history.db
+
+# Logs
+*.log
+```
+
+### Branching for Customization
+
+```bash
+# Create a personal branch for machine-specific changes
+git checkout -b $(hostname)
+
+# Main branch: portable defaults
+git checkout main
+
+# Merge portable changes
+git checkout $(hostname)
+git merge main
+```
+
+## Machine-Specific Configuration
+
+### Using Hostname Detection
+
+```fish
+# In config.fish
+set HOSTNAME (hostname)
+
+switch $HOSTNAME
+    case 'work-laptop'
+        set -gx EDITOR code
+        fish_add_path /opt/work/bin
+    case 'home-desktop'
+        set -gx EDITOR nvim
+        fish_add_path $HOME/projects/bin
+end
+```
+
+### Conditional Module Loading
+
+```conf
+# In hyprland.conf
+
+# Load laptop-specific config if on laptop
+source = modules/displays-laptop.conf  # Only if file exists
+```
+
+### Environment-Based Theming
+
+```fish
+# In config.fish
+if test "$ENVIRONMENT" = "work"
+    set -gx GTK_THEME Adwaita  # Professional look
+else
+    set -gx GTK_THEME BreezeDark  # Personal preference
+end
+```
+
+## Sharing Your Customizations
+
+### Extract Portable Module
+
+```bash
+# Share just your keybindings
+cp ~/.config/hypr/modules/keybindings.conf ~/shared/
+
+# Share Fish abbreviations
+grep 'abbr --add' ~/.config/fish/config.fish > ~/shared/abbreviations.fish
+```
+
+### Create Template Variables
+
+```conf
+# Instead of:
+$terminal = kitty
+
+# Document as:
+$terminal = kitty  # Edit: your preferred terminal
+```
+
+### Document Dependencies
+
+```markdown
+## Required Packages
+
+- Waybar >= 0.9.0
+- Hyprland >= 0.40.0  
+- Fish shell >= 3.0
+- Nerd Font (any variant)
+```
+
+## Testing Changes Safely
+
+### Backup Before Editing
+
+```bash
+# Backup entire config
+cp -r ~/.config/hypr ~/.config/hypr.backup
+
+# Backup specific file
+cp ~/.config/fish/config.fish ~/.config/fish/config.fish.bak
+```
+
+### Test in Isolation
+
+```bash
+# Test Fish config
+fish --no-config  # Start clean shell
+source ~/test-config.fish  # Test specific file
+
+# Test Hyprland module
+# Create test config that sources only what you need
+```
+
+### Incremental Changes
+
+1. Change one thing at a time
+2. Test immediately
+3. Commit if it works
+4. Repeat
+
+```bash
+git add ~/.config/hypr/modules/keybindings.conf
+git commit -m "Add custom keybinding for screenshot tool"
+```
+
+## Advanced Patterns
+
+### Dynamic Configuration Generation
+
+```fish
+# Generate config based on system
+function generate_hypr_config
+    set monitors (hyprctl monitors | grep Monitor | awk '{print $2}')
+    
+    for monitor in $monitors
+        echo "monitor = $monitor,preferred,auto,1" >> monitors.conf
+    end
+end
+```
+
+### Configuration Validation
+
+```fish
+# Validate before applying
+function validate_fish_config
+    fish -n ~/.config/fish/config.fish
+    and echo "✓ Config is valid"
+    or echo "✗ Syntax error in config"
+end
+```
+
+### Auto-Sync Across Machines
+
+```bash
+# Add to Fish config or cron
+function sync_dotfiles
+    cd ~/dotfiles
+    git pull origin main
+    git push origin (hostname)
+end
+```
+
+## Getting Help
+
+### Debugging Your Extensions
+
+**Fish:**
+```bash
+fish --debug  # Verbose debug output
+fish --private  # Isolated test session
+```
+
+**Hyprland:**
+```bash
+hyprctl reload  # Reload config
+hyprctl logs    # Check error logs
+```
+
+**Waybar:**
+```bash
+killall waybar
+waybar --log-level debug  # Verbose output
+```
+
+### Useful Resources
+
+- **Hyprland Wiki:** https://wiki.hyprland.org
+- **Fish Documentation:** https://fishshell.com/docs/current/
+- **Waybar Wiki:** https://github.com/Alexays/Waybar/wiki
+- **Nerd Fonts:** https://www.nerdfonts.com
+
+## Quick Start Checklist
+
+**To extend this configuration:**
+
+- [ ] Understand the modular structure
+- [ ] Identify which module to edit
+- [ ] Backup before making changes
+- [ ] Make one change at a time  
+- [ ] Test immediately
+- [ ] Commit working changes
+- [ ] Document custom additions
+- [ ] Keep secrets out of version control
+
+**Remember:** This configuration is designed to be modified. Don't be afraid to experiment!

@@ -1,0 +1,477 @@
+---
+title: Git Configuration
+description: Git configuration with GitHub CLI credential helper and sensible defaults
+---
+
+## Overview
+
+This Git configuration uses the GitHub CLI (`gh`) for credential management, sets sensible defaults for performance and usability, and configures Neovim as the default editor.
+
+## Configuration Location
+
+Main config: `~/.gitconfig` (or `~/dot-gitconfig` in dotfiles)
+
+## Credential Management
+
+GitHub CLI handles authentication for GitHub and Gist:
+
+```ini
+[credential "https://github.com"]
+    helper = !/usr/bin/gh auth git-credential
+
+[credential "https://gist.github.com"]
+    helper =
+    helper = !/usr/bin/gh auth git-credential
+
+[credential]
+    helper = !gh auth git-credential
+```
+
+### Setting Up GitHub CLI
+
+<Tabs>
+  <Tab title="Install">
+    **Fedora:**
+    ```bash
+    sudo dnf install gh
+    ```
+    
+    **Ubuntu/Debian:**
+    ```bash
+    sudo apt install gh
+    ```
+    
+    **macOS:**
+    ```bash
+    brew install gh
+    ```
+  </Tab>
+  <Tab title="Authenticate">
+    ```bash
+    gh auth login
+    ```
+    
+    Follow prompts to:
+    1. Choose GitHub.com or Enterprise
+    2. Select HTTPS or SSH
+    3. Authenticate via browser or token
+  </Tab>
+  <Tab title="Verify">
+    ```bash
+    gh auth status
+    ```
+    
+    Should show: "✓ Logged in to github.com"
+  </Tab>
+</Tabs>
+
+### Why GitHub CLI?
+
+- **No password prompts**: Automatic token management
+- **Two-factor auth**: Handles 2FA seamlessly
+- **Multiple accounts**: Switch between accounts with `gh auth switch`
+- **SSH key management**: `gh ssh-key` commands
+
+## User Configuration
+
+```ini
+[user]
+    name = shawal-mbalire
+    email = mbalireshawal@gmail.com
+```
+
+Update with your information:
+
+```bash
+git config --global user.name "Your Name"
+git config --global user.email "your.email@example.com"
+```
+
+## Editor Configuration
+
+```ini
+[core]
+    editor = nvim
+```
+
+Sets Neovim as the default editor for commit messages, interactive rebases, etc.
+
+### Alternative Editors
+
+```bash
+# Vim
+git config --global core.editor vim
+
+# VS Code
+git config --global core.editor "code --wait"
+
+# Nano
+git config --global core.editor nano
+```
+
+## HTTP Configuration
+
+```ini
+[http]
+    postBuffer = 524288000      # 500 MB buffer
+    version = HTTP/1.1
+    lowSpeedLimit = 0
+    lowSpeedTime = 999999
+```
+
+### Performance Settings
+
+- **postBuffer**: Increases buffer for large repositories (500 MB)
+- **HTTP/1.1**: Uses HTTP/1.1 for better compatibility
+- **lowSpeed settings**: Prevents timeout on slow connections
+
+Useful for:
+- Large repositories with big binary files
+- Slow or unstable network connections
+- Pushing large commits
+
+## Repository Initialization
+
+```ini
+[init]
+    defaultBranch = main
+```
+
+Sets `main` as the default branch for new repositories (instead of `master`).
+
+## Useful Aliases
+
+Add to `~/.gitconfig` for productivity:
+
+```ini
+[alias]
+    # Status
+    s = status -s
+    st = status
+    
+    # Commit
+    c = commit
+    cm = commit -m
+    ca = commit --amend
+    
+    # Branch
+    b = branch
+    ba = branch -a
+    bd = branch -d
+    
+    # Checkout
+    co = checkout
+    cob = checkout -b
+    
+    # Log
+    l = log --oneline
+    lg = log --graph --oneline --decorate --all
+    last = log -1 HEAD
+    
+    # Diff
+    d = diff
+    ds = diff --staged
+    
+    # Remote
+    p = push
+    pl = pull
+    f = fetch
+    
+    # Reset
+    unstage = reset HEAD --
+    undo = reset --soft HEAD^
+    
+    # Stash
+    ss = stash save
+    sl = stash list
+    sp = stash pop
+```
+
+### Using Aliases
+
+```bash
+git s          # Short status
+git cm "msg"   # Commit with message
+git lg         # Pretty log graph
+git cob feat   # Create and checkout branch
+git undo       # Undo last commit (keep changes)
+```
+
+## Additional Recommended Settings
+
+### Auto-correct Typos
+
+```ini
+[help]
+    autocorrect = 20  # Wait 2 seconds before auto-executing
+```
+
+Example:
+```bash
+$ git pussh
+WARNING: You called a Git command named 'pussh', which does not exist.
+Continuing in 2 seconds, assuming you meant 'push'.
+```
+
+### Color Output
+
+```ini
+[color]
+    ui = auto
+    branch = auto
+    diff = auto
+    status = auto
+```
+
+### Rebase by Default
+
+```ini
+[pull]
+    rebase = true
+```
+
+Use `git pull --rebase` by default for cleaner history.
+
+### Default Push Behavior
+
+```ini
+[push]
+    default = current
+    autoSetupRemote = true
+```
+
+- Pushes current branch to remote with same name
+- Automatically sets up remote tracking
+
+### Merge Tool
+
+```ini
+[merge]
+    tool = vimdiff
+    conflictstyle = diff3
+```
+
+Or use Neovim:
+
+```ini
+[merge]
+    tool = nvim
+[mergetool "nvim"]
+    cmd = nvim -d $LOCAL $REMOTE $MERGED -c '$wincmd w' -c 'wincmd J'
+```
+
+## SSH Configuration
+
+Prefer SSH over HTTPS:
+
+```bash
+# Generate SSH key
+ssh-keygen -t ed25519 -C "your.email@example.com"
+
+# Add to GitHub
+gh ssh-key add ~/.ssh/id_ed25519.pub
+
+# Or manually at https://github.com/settings/keys
+```
+
+### Always Use SSH
+
+```ini
+[url "git@github.com:"]
+    insteadOf = https://github.com/
+```
+
+Automatically converts HTTPS URLs to SSH.
+
+## Per-Repository Configuration
+
+Override global settings in specific repos:
+
+```bash
+cd ~/work/repo
+git config user.email "work@company.com"
+git config core.editor "code --wait"
+```
+
+Settings stored in `.git/config` (not `~/.gitconfig`).
+
+## FAQ
+
+<Accordion title="Authentication failing?">
+  Check GitHub CLI status:
+  
+  ```bash
+  gh auth status
+  ```
+  
+  If logged out:
+  
+  ```bash
+  gh auth login
+  ```
+  
+  Refresh credentials:
+  
+  ```bash
+  gh auth refresh
+  ```
+</Accordion>
+
+<Accordion title="Slow clone/push/pull?">
+  Increase HTTP buffer:
+  
+  ```ini
+  [http]
+      postBuffer = 1048576000  # 1 GB
+  ```
+  
+  Or switch to SSH:
+  
+  ```bash
+  git remote set-url origin git@github.com:user/repo.git
+  ```
+</Accordion>
+
+<Accordion title="How do I use different email for work repos?">
+  Use conditional includes:
+  
+  ```ini
+  # ~/.gitconfig
+  [includeIf "gitdir:~/work/"]
+      path = ~/.gitconfig-work
+  ```
+  
+  Create `~/.gitconfig-work`:
+  
+  ```ini
+  [user]
+      email = work@company.com
+  ```
+</Accordion>
+
+<Accordion title="How to sign commits with GPG?">
+  Generate GPG key:
+  
+  ```bash
+  gpg --full-generate-key
+  ```
+  
+  Add to GitHub:
+  
+  ```bash
+  gh gpg-key add
+  ```
+  
+  Configure Git:
+  
+  ```bash
+  git config --global user.signingkey YOUR_GPG_KEY_ID
+  git config --global commit.gpgsign true
+  ```
+</Accordion>
+
+<Accordion title="Default branch still 'master'?">
+  Set globally:
+  
+  ```bash
+  git config --global init.defaultBranch main
+  ```
+  
+  Rename existing branch:
+  
+  ```bash
+  git branch -m master main
+  git push -u origin main
+  git push origin --delete master
+  ```
+</Accordion>
+
+## Complete Example Configuration
+
+```ini
+# ~/.gitconfig
+
+[user]
+    name = Your Name
+    email = your.email@example.com
+
+[core]
+    editor = nvim
+    autocrlf = input
+    excludesfile = ~/.gitignore_global
+
+[init]
+    defaultBranch = main
+
+[credential]
+    helper = !gh auth git-credential
+
+[credential "https://github.com"]
+    helper = !/usr/bin/gh auth git-credential
+
+[credential "https://gist.github.com"]
+    helper =
+    helper = !/usr/bin/gh auth git-credential
+
+[http]
+    postBuffer = 524288000
+    version = HTTP/1.1
+
+[pull]
+    rebase = true
+
+[push]
+    default = current
+    autoSetupRemote = true
+
+[color]
+    ui = auto
+
+[alias]
+    s = status -s
+    cm = commit -m
+    co = checkout
+    cob = checkout -b
+    l = log --oneline
+    lg = log --graph --oneline --decorate --all
+    unstage = reset HEAD --
+    undo = reset --soft HEAD^
+```
+
+## Global Gitignore
+
+Create `~/.gitignore_global`:
+
+```gitignore
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Dependencies
+node_modules/
+vendor/
+
+# Build
+dist/
+build/
+*.log
+```
+
+Enable:
+
+```bash
+git config --global core.excludesfile ~/.gitignore_global
+```
+
+## Related Configuration
+
+- See [Fish Shell](/config/fish) for Git abbreviations
+- See [Neovim](/config/neovim) for editor integration
+- See [GitHub CLI docs](https://cli.github.com/manual/) for `gh` commands

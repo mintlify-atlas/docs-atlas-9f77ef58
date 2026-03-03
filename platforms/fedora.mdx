@@ -1,0 +1,231 @@
+---
+title: Fedora Setup
+description: Complete guide for installing and configuring dotfiles on Fedora Linux
+---
+
+## Initial Setup
+
+Clone the repository and set up your dotfiles on Fedora.
+
+<Steps>
+  <Step title="Authenticate with GitHub">
+    ```sh
+    gh auth login
+    ```
+  </Step>
+
+  <Step title="Clone and set up repository">
+    ```sh
+    gh repo clone shawal-mbalire/root_home_shawal
+    cp -r root_home_shawal/.git/ .git/
+    git pull
+    rm -rf root_home_shawal
+    ```
+  </Step>
+</Steps>
+
+## Core Package Installation
+
+Install essential packages for Hyprland and development tools.
+
+```sh
+sudo dnf install lua lua-devel luarocks go lua5.1
+sudo dnf install hyprland hyprland-devel hyprlock hypridle hyprpolkitagent hyprpaper
+sudo dnf install fish kitty rofi blueman pavucontrol waybar gh google-chrome nm-applet flatpak
+sudo dnf install exa gammastep
+```
+
+## Switching to Hyprland
+
+<Warning>
+  The following commands will remove GNOME desktop environment. Make sure you have a backup and understand this is a destructive operation.
+</Warning>
+
+<Steps>
+  <Step title="Install Hyprland and SDDM">
+    ```sh
+    sudo dnf install hyprland sddm
+    ```
+  </Step>
+
+  <Step title="Remove GNOME shell">
+    ```sh
+    sudo dnf remove gnome-shell --setopt protected_packages=
+    ```
+  </Step>
+
+  <Step title="Set Fish as default shell">
+    ```sh
+    echo /usr/local/bin/fish | sudo tee -a /etc/shells
+    chsh -s /usr/bin/fish
+    ```
+  </Step>
+
+  <Step title="Remove remaining desktop environments">
+    <Warning>
+      This removes all GNOME, Plasma, and KDE packages from your system.
+    </Warning>
+    
+    ```sh
+    sudo dnf remove gnome-** plasma-** kde-**
+    sudo dnf install nautilus
+    ```
+  </Step>
+</Steps>
+
+## Hyprland Polkit Authentication Agent
+
+Set up the authentication agent for graphical password prompts.
+
+<Steps>
+  <Step title="Enable COPR repository">
+    ```sh
+    sudo dnf copr enable solopasha/hypr
+    ```
+  </Step>
+
+  <Step title="Install hyprpolkitagent">
+    ```sh
+    sudo dnf install hyprpolkitagent
+    ```
+  </Step>
+
+  <Step title="Enable systemd service">
+    <Info>
+      Do NOT use `sudo` with this command. User services must be managed as your regular user.
+    </Info>
+    
+    ```sh
+    systemctl --user enable --now hyprpolkitagent.service
+    ```
+  </Step>
+</Steps>
+
+### Understanding User vs System Services
+
+- **User Services**: The `--user` flag manages services for your specific user account, not the entire system
+- **Why `sudo` Breaks Things**: Running `sudo systemctl --user` operates as root, looking for root's services instead of yours
+- Always run `systemctl --user` as your regular user without `sudo`
+
+## COPR Repositories
+
+Enable additional COPR repositories for extra software.
+
+```sh
+sudo dnf copr enable alxhr0/Obsidian
+```
+
+### Nerd Fonts via COPR
+
+```sh
+sudo dnf copr enable zawertun/hack-fonts
+sudo dnf install hack-fonts
+```
+
+## Upgrading to Rawhide
+
+<Info>
+  Rawhide provides a rolling release experience with the latest fixes and patches.
+</Info>
+
+<Steps>
+  <Step title="Disable RPM Fusion repositories">
+    ```sh
+    sudo dnf config-manager setopt rpmfusion-free.enabled=0
+    sudo dnf config-manager setopt rpmfusion-free-updates.enabled=0
+    sudo dnf config-manager setopt rpmfusion-free-updates-debuginfo.enabled=0
+    sudo dnf config-manager setopt rpmfusion-free-updates-source.enabled=0
+    sudo dnf config-manager setopt rpmfusion-free-updates-testing.enabled=0
+    sudo dnf config-manager setopt rpmfusion-nonfree-updates-testing.enabled=0
+    ```
+  </Step>
+
+  <Step title="Clean package cache">
+    ```sh
+    sudo dnf autoremove
+    sudo dnf clean all
+    ```
+  </Step>
+
+  <Step title="Download and upgrade to Rawhide">
+    ```sh
+    sudo dnf system-upgrade download --releasever=rawhide
+    ```
+  </Step>
+</Steps>
+
+## Google Chrome Setup
+
+<Steps>
+  <Step title="Add Google Chrome repository">
+    ```sh
+    echo " [google-chrome]
+        1 name=google-chrome
+        2 baseurl=https://dl.google.com/linux/chrome/rpm/stable/x86_64
+        3 enabled=1
+        4 gpgcheck=1
+        5 gpgkey=https://dl.google.com/linux/linux_signing_key.pub  " >> /etc/yum.repos.d/google-chrome.repo
+    ```
+  </Step>
+
+  <Step title="Install Chrome and remove Firefox">
+    ```sh
+    sudo dnf install google-chrome
+    sudo dnf remove firefox**
+    ```
+  </Step>
+</Steps>
+
+## VSCodium Setup
+
+```sh
+sudo rpmkeys --import https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/-/raw/master/pub.gpg
+printf "[gitlab.com_paulcarroty_vscodium_repo]\nname=download.vscodium.com\nbaseurl=https://download.vscodium.com/rpms/\nenabled=1\ngpgcheck=1\nrepo_gpgcheck=1\ngpgkey=https://gitlab.com/paulcarroty/vscodium-repo/-/raw/master/pub.gpg\nmetadata_expire=1h" | sudo tee -a /etc/yum.repos.d/vscodium.repo
+```
+
+## Repository Management
+
+### List repositories
+
+```sh
+sudo dnf repo list
+```
+
+### Disable a repository
+
+```sh
+sudo dnf config-manager setopt repository.enabled=0
+```
+
+## Package Groups
+
+### List groups
+
+```sh
+dnf repo list
+```
+
+### Remove a group
+
+```sh
+sudo dnf group remove libreoffice
+```
+
+## Neovim Dependencies
+
+Install required packages for Neovim configuration.
+
+```sh
+sudo dnf install lua lua-devel luarocks go lua5.1
+```
+
+### Installing Luarocks
+
+```fish
+wget https://luarocks.org/releases/luarocks-3.11.1.tar.gz
+tar zxpf luarocks-3.11.1.tar.gz
+cd luarocks-3.11.1
+./configure && make && sudo make install
+sudo luarocks install luasocket
+lua
+```

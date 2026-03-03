@@ -1,0 +1,392 @@
+---
+title: Installation
+description: Install the dotfiles configuration using quick install or manual methods
+---
+
+## Installation methods
+
+Choose between a one-command quick install or manual installation for more control.
+
+<Note>
+  Before installing, ensure you have reviewed the [system requirements](/requirements) for your distribution.
+</Note>
+
+## Quick install
+
+The fastest way to get started is with the automated install script:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/shawal-mbalire/root_home_shawal/main/install.sh | bash
+```
+
+This script will:
+- Clone the repository
+- Use rsync to copy configurations to your home directory
+- Preserve existing files (use with caution)
+
+<Warning>
+  The quick install will copy files directly to your home directory. Back up any existing configurations before proceeding.
+</Warning>
+
+## Manual installation
+
+For more control over the installation process, follow these steps:
+
+<Steps>
+  <Step title="Clone the repository">
+    ```bash
+    git clone https://github.com/shawal-mbalire/root_home_shawal
+    cd root_home_shawal
+    ```
+  </Step>
+  
+  <Step title="Review the .stowrc configuration">
+    The repository uses GNU Stow with these settings:
+    
+    ```ini
+    --target=~
+    --ignore=.stowrc
+    --dotfiles
+    --verbose=1
+    ```
+    
+    This configuration:
+    - Targets your home directory (`~`)
+    - Ignores the `.stowrc` file itself
+    - Automatically renames `dot-` prefixes to `.`
+    - Shows verbose output
+  </Step>
+  
+  <Step title="Install with GNU Stow (recommended)">
+    If you have GNU Stow installed, you can selectively install components:
+    
+    ```bash
+    # Install all configurations
+    stow .
+    
+    # Or install specific components
+    stow dot-config/hypr
+    stow dot-config/fish
+    stow dot-config/waybar
+    ```
+    
+    <Tip>
+      GNU Stow creates symlinks, making it easy to update configurations by pulling git changes.
+    </Tip>
+  </Step>
+  
+  <Step title="Alternative: Use rsync">
+    If you prefer to copy files instead of symlinking:
+    
+    ```bash
+    rsync -avhu --progress root_home_shawal/ ~/
+    ```
+    
+    The flags mean:
+    - `-a`: Archive mode (preserves permissions, timestamps)
+    - `-v`: Verbose output
+    - `-h`: Human-readable file sizes
+    - `-u`: Update only (skip newer files)
+    - `--progress`: Show transfer progress
+  </Step>
+</Steps>
+
+## Platform-specific installation
+
+### Fedora
+
+For Fedora users, follow these comprehensive setup steps:
+
+<Steps>
+  <Step title="Authenticate with GitHub">
+    ```bash
+    gh auth login
+    ```
+  </Step>
+  
+  <Step title="Clone and setup the repository">
+    ```bash
+    gh repo clone shawal-mbalire/root_home_shawal
+    cp -r root_home_shawal/.git/ .git/
+    git pull
+    rm -rf root_home_shawal
+    ```
+  </Step>
+  
+  <Step title="Install core dependencies">
+    ```bash
+    sudo dnf install lua lua-devel luarocks go lua5.1
+    sudo dnf install hyprland hyprland-devel hyprlock hypridle hyprpolkitagent hyprpaper
+    sudo dnf install fish kitty rofi blueman pavucontrol waybar gh google-chrome nm-applet flatpak
+    sudo dnf install exa gammastep
+    ```
+  </Step>
+  
+  <Step title="Set Fish as default shell">
+    ```bash
+    echo /usr/bin/fish | sudo tee -a /etc/shells
+    chsh -s /usr/bin/fish
+    ```
+  </Step>
+  
+  <Step title="Optional: Remove GNOME">
+    If you want a minimal Hyprland-only setup:
+    
+    ```bash
+    sudo dnf install hyprland sddm
+    sudo dnf remove gnome-shell --setopt protected_packages=
+    sudo dnf install nautilus  # Keep file manager
+    ```
+    
+    <Warning>
+      This removes GNOME entirely. Make sure Hyprland is working before removing your current desktop environment.
+    </Warning>
+  </Step>
+</Steps>
+
+### Arch Linux
+
+For Arch-based distributions:
+
+<Steps>
+  <Step title="Install Hyprland and core tools">
+    ```bash
+    yay -Syyu hyprland-git wofi drun
+    ```
+  </Step>
+  
+  <Step title="Install Nerd Fonts">
+    ```bash
+    yay -S ttf-hack-nerd
+    ```
+  </Step>
+  
+  <Step title="Clone and install dotfiles">
+    ```bash
+    git clone https://github.com/shawal-mbalire/root_home_shawal
+    cd root_home_shawal
+    stow .  # Or use rsync method
+    ```
+  </Step>
+</Steps>
+
+## Post-installation setup
+
+After installing the dotfiles, complete these additional configuration steps:
+
+<Steps>
+  <Step title="Install Nerd Fonts">
+    Required for proper icon display in Waybar and terminal.
+    
+    <CodeGroup>
+    ```bash Fedora
+    sudo dnf copr enable zawertun/hack-fonts
+    sudo dnf install hack-fonts
+    ```
+    
+    ```bash Arch
+    yay -S ttf-hack-nerd
+    ```
+    
+    ```bash JetBrainsMono (All distributions)
+    curl -OL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.tar.xz
+    mkdir -p ~/.local/share/fonts
+    tar -xf JetBrainsMono.tar.xz -C ~/.local/share/fonts
+    fc-cache -fv
+    ```
+    </CodeGroup>
+  </Step>
+  
+  <Step title="Install tmux plugin manager">
+    Required for tmux configuration:
+    
+    ```bash
+    git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm
+    ```
+    
+    Then open tmux and press `Prefix + I` to install plugins.
+  </Step>
+  
+  <Step title="Set up Neovim">
+    The configuration uses LazyVim. On first launch, plugins will auto-install:
+    
+    ```bash
+    nvim
+    ```
+    
+    Wait for Lazy to install all plugins.
+  </Step>
+  
+  <Step title="Enable Hyprland polkit agent">
+    For graphical authentication prompts:
+    
+    <CodeGroup>
+    ```bash Fedora
+    sudo dnf copr enable solopasha/hypr
+    sudo dnf install hyprpolkitagent
+    systemctl --user enable --now hyprpolkitagent.service
+    ```
+    
+    ```bash Arch
+    sudo pacman -S hyprpolkitagent
+    systemctl --user enable --now hyprpolkitagent.service
+    ```
+    </CodeGroup>
+    
+    <Info>
+      Use `systemctl --user` without `sudo` for user services.
+    </Info>
+  </Step>
+  
+  <Step title="Verify Hyprland configuration">
+    Before restarting Hyprland, verify the configuration is valid:
+    
+    ```bash
+    hyprland --config ~/.config/hypr/hyprland.conf --verify-config
+    ```
+  </Step>
+  
+  <Step title="Reload Hyprland">
+    Apply the new configuration:
+    
+    ```bash
+    hyprctl reload
+    ```
+    
+    Or log out and log back in to Hyprland.
+  </Step>
+</Steps>
+
+## Optional applications
+
+Install these applications based on your needs:
+
+### Snap packages
+
+```bash
+sudo snap install obsidian --classic
+sudo snap install code-insiders --classic
+```
+
+### Flatpak applications
+
+```bash
+flatpak install flathub app.zen_browser.zen
+flatpak install flathub io.github.qurancompanion.QuranCompanion
+```
+
+## Customization
+
+The dotfiles are designed for easy customization:
+
+### Hyprland variables
+
+Edit `~/.config/hypr/hyprland.conf` to change core settings:
+
+```bash
+# Change your terminal
+$terminal = kitty  # or foot, alacritty, etc.
+
+# Change your browser
+$browser = flatpak run app.zen_browser.zen
+
+# Adjust colors
+$active_border_color = rgba(89b4faff) rgba(89dcebee) 90deg
+
+# Modify gaps and rounding
+$gaps_in = 5
+$gaps_out = 10
+$rounding = 8
+```
+
+After editing, reload Hyprland:
+
+```bash
+hyprctl reload
+```
+
+### Fish shell configuration
+
+Edit `~/.config/fish/config.fish` to customize your shell:
+
+```fish
+# Change default editor
+set -gx EDITOR /usr/bin/nvim
+
+# Add custom abbreviations
+abbr --add --global myabbr 'my command'
+
+# Modify VI keybindings
+fish_vi_key_bindings insert
+```
+
+Changes take effect in new shell sessions.
+
+### Waybar styling
+
+Edit `~/.config/waybar/style.css` to customize the status bar appearance. Reload Waybar:
+
+```bash
+killall waybar && waybar &
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Waybar not showing icons">
+    Install Nerd Fonts (see post-installation step 1) and ensure your Waybar config references the correct font:
+    
+    ```json
+    "font": "JetBrainsMono Nerd Font 10"
+    ```
+  </Accordion>
+  
+  <Accordion title="Hyprland won't start">
+    Check the configuration for syntax errors:
+    
+    ```bash
+    hyprland --config ~/.config/hypr/hyprland.conf --verify-config
+    ```
+    
+    Check logs:
+    
+    ```bash
+    cat /tmp/hypr/$(ls -t /tmp/hypr | head -n 1)/hyprland.log
+    ```
+  </Accordion>
+  
+  <Accordion title="Fish shell abbreviations not working">
+    Abbreviations are only available in interactive shells. Verify Fish is your login shell:
+    
+    ```bash
+    echo $SHELL
+    ```
+    
+    Should output `/usr/bin/fish`.
+  </Accordion>
+  
+  <Accordion title="Authentication prompts not appearing">
+    Ensure hyprpolkitagent is running:
+    
+    ```bash
+    systemctl --user status hyprpolkitagent.service
+    ```
+    
+    If not running:
+    
+    ```bash
+    systemctl --user enable --now hyprpolkitagent.service
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Hyprland configuration" icon="window-restore" href="/config/hyprland">
+    Explore the modular Hyprland setup
+  </Card>
+  <Card title="Fish shell" icon="terminal" href="/config/fish">
+    Learn about Fish configuration and keybindings
+  </Card>
+</CardGroup>

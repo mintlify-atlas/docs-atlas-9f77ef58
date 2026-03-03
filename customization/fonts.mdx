@@ -1,0 +1,373 @@
+---
+title: 'Font Configuration'
+description: 'Install and configure fonts for terminal, UI, and applications'
+---
+
+## Overview
+
+This configuration uses Nerd Fonts for icon support across terminal applications and includes specific fonts for different UI elements.
+
+## Installed Fonts
+
+The following fonts are included in `~/.local/share/fonts/`:
+
+### Primary Fonts
+
+| Font | Usage | Features |
+|------|-------|----------|
+| **JetBrains Mono Nerd Font** | Terminal, code editing | Monospaced, ligatures, Nerd Font icons |
+| **Sono** | Waybar, UI elements | Modern sans-serif |
+| **Comfortaa** | UI accents | Rounded, friendly appearance |
+| **Hack Nerd Font** | Alternative terminal font | Monospaced, Nerd Font icons |
+
+### Additional Fonts
+
+| Font | Purpose |
+|------|--------|
+| **Iosevka Nerd Font** | Alternative coding font |
+| **Amiri** | Arabic script support |
+| **Scheherazade New** | Arabic typography |
+| **GrapeNuts** | Display font |
+| **Icomoon Feather** | Icon font |
+
+## Installing Nerd Fonts
+
+Nerd Fonts add thousands of icons and glyphs for terminal applications like ls, git prompts, and more.
+
+### Arch Linux
+
+```bash
+yay -S ttf-hack-nerd
+```
+
+### Fedora
+
+```bash
+# Add COPR repository
+sudo dnf copr enable zawertun/hack-fonts
+
+# Install Hack Nerd Font
+sudo dnf install hack-fonts
+```
+
+### JetBrains Mono Nerd Font (All Distros)
+
+```bash
+# Download latest release
+curl -OL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.tar.xz
+
+# Extract to fonts directory
+mkdir -p ~/.local/share/fonts/JetBrainsMono
+tar -xf JetBrainsMono.tar.xz -C ~/.local/share/fonts/JetBrainsMono/
+
+# Refresh font cache
+fc-cache -fv
+```
+
+### Other Nerd Fonts
+
+Visit [Nerd Fonts releases](https://github.com/ryanoasis/nerd-fonts/releases) for more options:
+
+- **FiraCode** - Popular programming font with ligatures
+- **Iosevka** - Slender monospace font
+- **SourceCodePro** - Adobe's coding font
+- **Meslo** - Customized Apple Menlo font
+
+## Font Configuration by Application
+
+### Waybar
+
+Location: `~/.config/waybar/style.css`
+
+```css
+* {
+    font-family: "Sono Medium", "JetBrainsMono Nerd Font", sans-serif;
+    font-size: 16px;
+}
+```
+
+**Customizing Waybar font:**
+
+```css
+/* Change font family */
+* {
+    font-family: "Your Font Name", "Fallback Font", sans-serif;
+}
+
+/* Adjust font size */
+* {
+    font-size: 14px;  /* Smaller */
+}
+
+/* Specific modules */
+#clock {
+    font-family: "Comfortaa";
+    font-size: 18px;
+    font-weight: bold;
+}
+```
+
+### Kitty Terminal
+
+Location: `~/.config/kitty/kitty.conf` (if it exists)
+
+```conf
+# Font family
+font_family      JetBrainsMono Nerd Font
+bold_font        JetBrainsMono Nerd Font Bold
+italic_font      JetBrainsMono Nerd Font Italic
+bold_italic_font JetBrainsMono Nerd Font Bold Italic
+
+# Font size
+font_size 12.0
+
+# Font features (ligatures, etc.)
+disable_ligatures never
+```
+
+### GTK Applications
+
+System font settings for Nautilus, settings, etc.
+
+**Using gsettings (GNOME/GTK):**
+
+```bash
+# Interface font
+gsettings set org.gnome.desktop.interface font-name 'Cantarell 11'
+
+# Document font
+gsettings set org.gnome.desktop.interface document-font-name 'Sans 11'
+
+# Monospace font (terminal apps)
+gsettings set org.gnome.desktop.interface monospace-font-name 'JetBrainsMono Nerd Font 10'
+```
+
+**Using dconf-editor:**
+
+1. Install: `sudo dnf install dconf-editor` or `yay -S dconf-editor`
+2. Navigate to: `/org/gnome/desktop/interface/`
+3. Edit `font-name`, `monospace-font-name`, etc.
+
+### Rofi
+
+Location: `~/.config/rofi/config.rasi` or theme files
+
+```css
+* {
+    font: "JetBrainsMono Nerd Font 12";
+}
+```
+
+### VS Code / Code Insiders
+
+**Settings UI:**
+1. Open Settings (`Ctrl + ,`)
+2. Search "font family"
+3. Set: `'JetBrainsMono Nerd Font', 'Fira Code', monospace`
+
+**settings.json:**
+```json
+{
+    "editor.fontFamily": "'JetBrainsMono Nerd Font', 'Fira Code', monospace",
+    "editor.fontSize": 14,
+    "editor.fontLigatures": true,
+    "terminal.integrated.fontFamily": "'JetBrainsMono Nerd Font'",
+    "terminal.integrated.fontSize": 13
+}
+```
+
+### Neovim
+
+Neovim inherits terminal font settings. Configure your terminal emulator (Kitty) instead.
+
+## Font Features
+
+### Nerd Font Icons
+
+Nerd Fonts include icons from:
+- Font Awesome
+- Material Design Icons  
+- Weather Icons
+- Powerline symbols
+- File type icons
+
+**Test icon rendering:**
+```bash
+echo "   "
+```
+
+You should see: folder, git branch, check mark, terminal icons.
+
+### Ligatures
+
+Programming ligatures combine characters:
+- `==` → single equals symbol
+- `!=` → not-equals symbol
+- `->` → arrow
+- `>=` → greater-than-or-equal
+
+**Fonts with ligatures:**
+- JetBrains Mono
+- Fira Code  
+- Cascadia Code
+- Iosevka
+
+Enable in your editor/terminal config (shown above).
+
+## Installing Custom Fonts
+
+### System-Wide Installation
+
+```bash
+# Copy fonts to system directory
+sudo cp MyFont.ttf /usr/share/fonts/
+
+# Or create a dedicated directory
+sudo mkdir -p /usr/share/fonts/custom
+sudo cp MyFont.ttf /usr/share/fonts/custom/
+
+# Refresh font cache
+sudo fc-cache -fv
+```
+
+### User-Only Installation
+
+```bash
+# Create fonts directory if it doesn't exist
+mkdir -p ~/.local/share/fonts
+
+# Copy font files
+cp MyFont.ttf ~/.local/share/fonts/
+
+# Refresh font cache
+fc-cache -fv
+```
+
+### Font Formats
+
+Supported formats:
+- `.ttf` - TrueType Font (most common)
+- `.otf` - OpenType Font  
+- `.woff` / `.woff2` - Web fonts (can be converted)
+
+## Verifying Font Installation
+
+### List installed fonts
+
+```bash
+# All fonts
+fc-list
+
+# Filter by name
+fc-list | grep -i "jetbrains"
+
+# Show font details
+fc-list : family style file | grep -i "jetbrains"
+```
+
+### Test font in terminal
+
+```bash
+# View sample text
+fc-match "JetBrainsMono Nerd Font"
+
+# Check which font is used for a character
+fc-match --format="%{family}\n" :charset=1F4C1
+```
+
+### Verify Nerd Font icons
+
+```bash
+echo -e "\ue0b0 \ue0b1 \ue0b2 \ue0b3"  # Powerline triangles
+echo -e "\uf015 \uf07c \uf121"        # Home, folder, git
+```
+
+## Troubleshooting
+
+### Icons showing as boxes/questions marks
+
+**Cause:** Nerd Font not installed or not selected
+
+**Solution:**
+1. Install Nerd Font variant (see above)
+2. Set font in terminal config
+3. Refresh font cache: `fc-cache -fv`
+4. Restart terminal
+
+### Font looks blurry
+
+**Solution:** Enable font antialiasing and hinting
+
+```bash
+# Create/edit ~/.config/fontconfig/fonts.conf
+mkdir -p ~/.config/fontconfig
+```
+
+```xml
+<?xml version="1.0"?>
+<!DOCTYPE fontconfig SYSTEM "fonts.dtd">
+<fontconfig>
+  <match target="font">
+    <edit name="antialias" mode="assign">
+      <bool>true</bool>
+    </edit>
+    <edit name="hinting" mode="assign">
+      <bool>true</bool>
+    </edit>
+    <edit name="hintstyle" mode="assign">
+      <const>hintslight</const>
+    </edit>
+    <edit name="rgba" mode="assign">
+      <const>rgb</const>
+    </edit>
+  </match>
+</fontconfig>
+```
+
+### Font not showing in application
+
+1. Check if font is installed: `fc-list | grep "FontName"`
+2. Refresh font cache: `fc-cache -fv`  
+3. Restart application
+4. Check font name is exact (case-sensitive)
+
+### Waybar not using correct font
+
+1. Verify font name in `style.css` matches installed font
+2. Check for typos in font-family declaration
+3. Restart Waybar: `killall waybar && waybar &`
+
+## Font Recommendations
+
+### For Terminal
+
+1. **JetBrains Mono Nerd Font** - Best all-around
+2. **Fira Code Nerd Font** - Excellent ligatures
+3. **Hack Nerd Font** - Clean and readable
+4. **Iosevka Nerd Font** - Space-efficient
+
+### For UI Elements
+
+1. **Inter** - Modern, readable UI font
+2. **Roboto** - Google's material design font  
+3. **San Francisco** - Apple's system font
+4. **Cantarell** - GNOME's default font
+
+### For Waybar
+
+1. **Sono** (current) - Modern, clean
+2. **Comfortaa** (current) - Friendly, rounded
+3. **Outfit** - Geometric sans-serif
+4. **Manrope** - Professional, versatile
+
+## Font Size Guidelines
+
+| Element | Recommended Size |
+|---------|------------------|
+| Terminal | 11-13px |
+| Code editor | 12-14px |
+| Waybar | 14-16px |
+| UI elements | 10-12px |
+| Document text | 11-12px |
+
+Adjust based on screen size and DPI settings.

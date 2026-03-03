@@ -1,0 +1,450 @@
+---
+title: Tmux Configuration
+description: Catppuccin-themed tmux configuration with sessionx, floax, and vim navigation
+---
+
+## Overview
+
+This tmux configuration features the Catppuccin Mocha theme with transparent backgrounds, VI keybindings, and powerful plugins for session management, floating windows, and fuzzy finding.
+
+## Configuration Structure
+
+The configuration merges multiple concerns into a single file:
+
+- **opts.conf** - General tmux options
+- **keybinds.conf** - Key bindings
+- **skin.conf** - Catppuccin theme settings
+- **plugins.conf** - Plugin declarations and configuration
+
+Location: `~/.config/tmux/tmux.conf`
+
+## General Options
+
+### Terminal Settings
+
+```conf
+set-option -g default-terminal 'screen-256color'
+set-option -g terminal-overrides ',xterm-256color:RGB'
+set -g default-terminal "${TERM}"
+```
+
+Ensures proper color support and uses your existing `$TERM` value.
+
+### Base Settings
+
+```conf
+set -g base-index 1              # Windows start at 1
+set -g pane-base-index 1         # Panes start at 1
+set -g detach-on-destroy off     # Don't exit when closing session
+set -g escape-time 0             # No escape delay
+set -g history-limit 1000000     # 1M lines of history
+set -g renumber-windows on       # Renumber on window close
+set -g status-position top       # Status bar at top
+```
+
+### Input and Interaction
+
+```conf
+set -g mode-keys vi              # VI keys in copy mode
+set -g mouse on                  # Enable mouse support
+set -g set-clipboard on          # Use system clipboard
+```
+
+### Border Colors
+
+```conf
+set -g pane-active-border-style 'fg=magenta,bg=default'
+set -g pane-border-style 'fg=brightblack,bg=default'
+```
+
+## Key Bindings
+
+### Prefix Key
+
+```conf
+set -g prefix C-Space
+```
+
+**Prefix**: `Ctrl+Space` (instead of default `Ctrl+b`)
+
+### Copy Mode (VI)
+
+```conf
+bind-key -T copy-mode-vi v send-keys -X begin-selection
+bind-key -T copy-mode-vi C-v send-keys -X rectangle-toggle
+bind-key -T copy-mode-vi y send-keys -X copy-selection-and-cancel
+```
+
+| Key | Action |
+|-----|--------|
+| `v` | Begin selection |
+| `Ctrl+V` | Toggle rectangular selection |
+| `y` | Copy and exit copy mode |
+
+### Window Splitting
+
+```conf
+bind '"' split-window -v -c "#{pane_current_path}"
+bind % split-window -h -c "#{pane_current_path}"
+```
+
+Splits open in the current pane's directory.
+
+| Key | Action |
+|-----|--------|
+| `Prefix + "` | Split horizontally |
+| `Prefix + %` | Split vertically |
+
+### Essential Commands
+
+| Key | Action |
+|-----|--------|
+| `Prefix + c` | New window |
+| `Prefix + ,` | Rename window |
+| `Prefix + &` | Kill window |
+| `Prefix + x` | Kill pane |
+| `Prefix + d` | Detach session |
+| `Prefix + [` | Enter copy mode |
+| `Prefix + ]` | Paste buffer |
+
+## Plugins
+
+### Core Plugins
+
+```conf
+set -g @plugin 'tmux-plugins/tpm'
+set -g @plugin 'tmux-plugins/tmux-sensible'
+set -g @plugin 'tmux-plugins/tmux-yank'
+set -g @plugin 'christoomey/vim-tmux-navigator'
+set -g @plugin 'shawal-mbalire/catppuccin-tmux'
+set -g @plugin 'tmux-plugins/tmux-battery'
+```
+
+### Vim-Tmux Navigator
+
+Seamless navigation between vim and tmux panes:
+
+| Key | Action |
+|-----|--------|
+| `Ctrl+H` | Move left |
+| `Ctrl+J` | Move down |
+| `Ctrl+K` | Move up |
+| `Ctrl+L` | Move right |
+
+Works in both Vim/Neovim and tmux panes.
+
+### SessionX
+
+Powerful session manager with zoxide integration:
+
+```conf
+set -g @plugin 'omerxx/tmux-sessionx'
+set -g @sessionx-bind 'o'
+set -g @sessionx-window-height '85%'
+set -g @sessionx-window-width '75%'
+set -g @sessionx-zoxide-mode 'on'
+set -g @sessionx-auto-accept 'off'
+set -g @sessionx-filter-current 'false'
+```
+
+**Launch**: `Prefix + o`
+
+Features:
+- Fuzzy find sessions
+- Create new sessions from zoxide directories
+- Preview session contents
+- Switch or create sessions instantly
+
+### Floax
+
+Floating terminal windows:
+
+```conf
+set -g @plugin 'omerxx/tmux-floax'
+set -g @floax-bind 'p'
+set -g @floax-width '80%'
+set -g @floax-height '80%'
+set -g @floax-border-color 'magenta'
+set -g @floax-text-color 'blue'
+set -g @floax-change-path 'true'
+```
+
+**Launch**: `Prefix + p`
+
+Opens a floating terminal window (80% of screen size).
+
+### FZF Integrations
+
+<Tabs>
+  <Tab title="tmux-fzf">
+    ```conf
+    set -g @plugin 'sainnhe/tmux-fzf'
+    ```
+    
+    Fuzzy find tmux sessions, windows, and panes.
+    
+    **Launch**: `Prefix + F` (default)
+  </Tab>
+  <Tab title="tmux-fzf-url">
+    ```conf
+    set -g @plugin 'wfxr/tmux-fzf-url'
+    set -g @fzf-url-fzf-options '-p 60%,30% --prompt="   " --border-label=" Open URL "'
+    set -g @fzf-url-history-limit '2000'
+    ```
+    
+    Extract and open URLs from terminal output.
+    
+    **Launch**: `Prefix + u` (default)
+  </Tab>
+</Tabs>
+
+### Battery Indicator
+
+```conf
+set -g @plugin 'tmux-plugins/tmux-battery'
+```
+
+Displays battery status in the status bar (configured in theme).
+
+## Catppuccin Theme
+
+### Theme Configuration
+
+```conf
+set -g @catppuccin_flavour 'mocha'
+set -g @catppuccin_status_background "default"
+```
+
+Mocha flavor with transparent background.
+
+### Window Status Format
+
+```conf
+set -g @catppuccin_window_left_separator ""
+set -g @catppuccin_window_right_separator ""
+set -g @catppuccin_window_middle_separator "█"
+set -g @catppuccin_window_number_position "right"
+
+set -g @catppuccin_window_default_fill "number"
+set -g @catppuccin_window_default_text "#W"
+set -g @catppuccin_window_current_fill "number"
+set -g @catppuccin_window_current_text "#{pane_current_path}"
+```
+
+- Default windows show window name
+- Current window shows current directory path
+
+### Status Modules
+
+```conf
+set -g @catppuccin_status_modules_right "application date_time battery"
+set -g @catppuccin_status_modules_left "session"
+set -g @catppuccin_status_modules_middle "host"
+```
+
+**Layout**: `[session] ... [host] ... [app] [time] [battery]`
+
+### Status Separators
+
+```conf
+set -g @catppuccin_status_left_separator ""
+set -g @catppuccin_status_right_separator ""
+set -g @catppuccin_status_fill "icon"
+set -g @catppuccin_status_connect_separator "no"
+```
+
+Powerline-style separators with icon filling.
+
+### Custom Modules
+
+```conf
+set -g @catppuccin_directory_text "#{b:pane_current_path}"
+set -g @catppuccin_date_time_text "%H:%M"
+set -g @catppuccin_date_time_icon "󰃰"
+set -g @catppuccin_date_time_color "$thm_blue"
+```
+
+### Transparent Background
+
+```conf
+set -g status-bg default
+set -g status-style bg=default
+```
+
+Forces transparent status bar background.
+
+### Extra Spacing
+
+```conf
+set -g status-format[2] " "
+```
+
+Adds blank row below status bar for breathing room.
+
+## Plugin Installation
+
+### First-Time Setup
+
+1. Install TPM (Tmux Plugin Manager):
+
+```bash
+git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm
+```
+
+2. Reload tmux config:
+
+```bash
+tmux source ~/.config/tmux/tmux.conf
+```
+
+3. Install plugins:
+
+**Inside tmux**: `Prefix + I` (capital I)
+
+### Managing Plugins
+
+| Key | Action |
+|-----|--------|
+| `Prefix + I` | Install new plugins |
+| `Prefix + U` | Update plugins |
+| `Prefix + alt + u` | Uninstall removed plugins |
+
+## Local Configuration
+
+Custom settings without modifying the main config:
+
+```conf
+if-shell "[ -f ~/.config/tmux/tmux.local.conf ]" 'source ~/.config/tmux/tmux.local.conf'
+```
+
+Create `~/.config/tmux/tmux.local.conf` for machine-specific overrides.
+
+Example:
+
+```conf
+# ~/.config/tmux/tmux.local.conf
+set -g @catppuccin_status_modules_right "application date_time cpu battery"
+```
+
+## Usage Tips
+
+### Creating Sessions
+
+```bash
+# Named session
+tmux new -s myproject
+
+# Session in directory
+tmux new -s work -c ~/projects/work
+```
+
+### Attaching to Sessions
+
+```bash
+# Attach to last session
+tmux attach
+
+# Attach to named session
+tmux attach -t myproject
+
+# Kill session
+tmux kill-session -t myproject
+```
+
+### Using SessionX
+
+1. Press `Prefix + o`
+2. Fuzzy search sessions or directories
+3. Press `Enter` to switch or `Ctrl+X` to create new
+
+With zoxide integration, frequently used directories appear first.
+
+### Floating Terminal (Floax)
+
+1. Press `Prefix + p`
+2. A floating window opens
+3. Press `Prefix + p` again to toggle
+
+Perfect for quick commands without leaving your workspace.
+
+## FAQ
+
+<Accordion title="Plugins not loading?">
+  Ensure TPM is installed:
+  
+  ```bash
+  ls ~/.config/tmux/plugins/tpm
+  ```
+  
+  If missing:
+  
+  ```bash
+  git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm
+  ```
+  
+  Then reload and install: `Prefix + I`
+</Accordion>
+
+<Accordion title="Colors look wrong?">
+  Check terminal `$TERM` value:
+  
+  ```bash
+  echo $TERM
+  ```
+  
+  Should be `xterm-256color` or similar. Set in your shell profile:
+  
+  ```fish
+  set -gx TERM xterm-256color
+  ```
+</Accordion>
+
+<Accordion title="How do I reload config?">
+  Inside tmux:
+  
+  ```
+  Prefix + :source ~/.config/tmux/tmux.conf
+  ```
+  
+  Or from shell:
+  
+  ```bash
+  tmux source ~/.config/tmux/tmux.conf
+  ```
+</Accordion>
+
+<Accordion title="Mouse not working?">
+  Ensure mouse mode is enabled:
+  
+  ```conf
+  set -g mouse on
+  ```
+  
+  Reload config: `Prefix + :source ~/.config/tmux/tmux.conf`
+</Accordion>
+
+<Accordion title="How do I customize the status bar?">
+  Modify Catppuccin module settings:
+  
+  ```conf
+  set -g @catppuccin_status_modules_right "cpu memory battery date_time"
+  ```
+  
+  See [Catppuccin Tmux docs](https://github.com/catppuccin/tmux) for available modules.
+</Accordion>
+
+## Configuration Location
+
+```
+~/.config/tmux/
+├── tmux.conf
+├── tmux.local.conf (optional)
+└── plugins/
+    └── tpm/
+```
+
+## Related Configuration
+
+- See [Neovim](/config/neovim) for editor integration
+- See [Fish Shell](/config/fish) for shell configuration
+- See [Kitty](/config/kitty) for terminal settings

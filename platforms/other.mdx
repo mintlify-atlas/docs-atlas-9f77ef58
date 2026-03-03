@@ -1,0 +1,192 @@
+---
+title: Other Distributions
+description: Guide for adapting dotfiles to other Linux distributions and platforms
+---
+
+## Overview
+
+While these dotfiles are primarily tested on Fedora and Arch Linux, they can be adapted to work on other distributions with some modifications.
+
+## Universal Dependencies
+
+Regardless of your distribution, you'll need these core components:
+
+### Window Manager
+- **Hyprland**: Wayland compositor (check your distribution's repositories or build from source)
+- **SDDM**: Display manager for login screen
+
+### Core Utilities
+- **Fish**: Shell
+- **Kitty**: Terminal emulator
+- **Rofi**: Application launcher
+- **Waybar**: Status bar for Wayland
+
+### System Tools
+- **Blueman**: Bluetooth manager
+- **Pavucontrol**: Audio control
+- **nm-applet**: Network manager applet
+- **Flatpak**: Universal package manager
+
+### Development Tools
+- **Neovim**: Text editor
+- **Git**: Version control
+- **GitHub CLI (gh)**: GitHub integration
+- **Lua and Go**: Required for Neovim plugins
+
+### Additional Tools
+- **exa**: Modern ls replacement
+- **gammastep**: Screen temperature adjustment (Wayland alternative to redshift)
+
+## Installation Methods
+
+### Quick Install
+
+The install script should work on most distributions:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/shawal-mbalire/root_home_shawal/main/install.sh | bash
+```
+
+### Manual Install
+
+```sh
+git clone https://github.com/shawal-mbalire/root_home_shawal
+rsync -avhu --progress root_home_shawal/ ~/
+```
+
+## Distribution-Specific Package Managers
+
+### Debian/Ubuntu
+
+```sh
+sudo apt update
+sudo apt install fish kitty rofi blueman pavucontrol network-manager-gnome flatpak
+sudo apt install neovim git lua5.1 golang-go
+```
+
+<Note>
+  Hyprland may not be available in official repositories. Check [Hyprland installation guide](https://wiki.hyprland.org/Getting-Started/Installation/) for building from source.
+</Note>
+
+### openSUSE
+
+```sh
+sudo zypper install fish kitty rofi blueman pavucontrol network-manager-applet flatpak
+sudo zypper install neovim git lua51 go
+```
+
+### Gentoo
+
+```sh
+sudo emerge --ask gui-apps/kitty app-shells/fish x11-misc/rofi
+sudo emerge --ask app-editors/neovim dev-vcs/git dev-lang/lua dev-lang/go
+```
+
+### NixOS
+
+Add to your `configuration.nix`:
+
+```nix
+environment.systemPackages = with pkgs; [
+  hyprland
+  fish
+  kitty
+  rofi-wayland
+  waybar
+  blueman
+  pavucontrol
+  networkmanagerapplet
+  neovim
+  git
+  gh
+  exa
+];
+```
+
+## Adapting the Configuration
+
+### Path Differences
+
+Some distributions may have different paths for binaries. Update shell configuration if needed:
+
+- Fish shell path: Usually `/usr/bin/fish` or `/usr/local/bin/fish`
+- Check with: `which fish`
+
+### Missing Packages
+
+If certain packages aren't available:
+
+1. **Check alternative repositories**: PPAs (Ubuntu), COPR (Fedora), AUR (Arch)
+2. **Use Flatpak**: Many GUI applications available as Flatpaks
+3. **Build from source**: Follow upstream documentation
+
+### Hyprland Availability
+
+Hyprland availability varies by distribution:
+
+- **Arch**: Available via AUR
+- **Fedora**: Available in official repos
+- **Ubuntu/Debian**: May need to build from source
+- **NixOS**: Available in nixpkgs
+
+Check the [official Hyprland wiki](https://wiki.hyprland.org/Getting-Started/Installation/) for your distribution.
+
+## Configuration File Locations
+
+These dotfiles expect the following structure:
+
+```
+~/.config/
+├── hypr/          # Hyprland configuration
+├── kitty/         # Kitty terminal configuration
+├── fish/          # Fish shell configuration
+├── nvim/          # Neovim configuration
+├── rofi/          # Rofi launcher configuration
+├── waybar/        # Waybar configuration
+└── tmux/          # Tmux configuration
+```
+
+This structure is distribution-agnostic and should work everywhere.
+
+## Troubleshooting
+
+### Missing Dependencies
+
+If a program fails to start, check for missing dependencies:
+
+```sh
+ldd /path/to/binary
+```
+
+### Wayland vs X11
+
+These dotfiles are designed for Wayland. If your distribution doesn't support Wayland:
+
+- Consider switching to a Wayland-compatible compositor
+- Or adapt the configuration for X11 (requires significant changes)
+
+### Permission Issues
+
+Ensure configuration files have correct permissions:
+
+```sh
+chmod 644 ~/.config/**/*
+chmod 755 ~/.config/**/
+```
+
+## Getting Help
+
+If you encounter issues on your distribution:
+
+1. Check your distribution's wiki/documentation
+2. Search for Hyprland + your distribution name
+3. Join Hyprland community Discord or forums
+4. Open an issue in the dotfiles repository
+
+## Contributing
+
+If you successfully adapt these dotfiles to another distribution, consider:
+
+- Documenting your process
+- Submitting a pull request with distribution-specific instructions
+- Sharing in the community

@@ -1,0 +1,172 @@
+---
+title: Introduction
+description: A modern, modular Linux dotfiles setup for Hyprland with 12-factor design principles
+---
+
+## Welcome to dotfiles
+
+A personal Linux configuration focused on minimalism, modularity, and portability. Built for Hyprland with carefully curated tools and a cohesive Catppuccin Mocha theme.
+
+<CardGroup cols={2}>
+  <Card title="Installation" icon="download" href="/installation">
+    Get started with quick install or manual setup
+  </Card>
+  <Card title="Requirements" icon="list-check" href="/requirements">
+    Check dependencies and system requirements
+  </Card>
+  <Card title="Hyprland Config" icon="window-restore" href="/config/hyprland">
+    Explore the modular 12-factor Hyprland setup
+  </Card>
+  <Card title="Fish Shell" icon="terminal" href="/config/fish">
+    Discover VI keybindings and portable configuration
+  </Card>
+</CardGroup>
+
+## Key features
+
+This dotfiles repository brings together a curated set of tools and configurations designed for efficiency and portability.
+
+### 12-factor Hyprland configuration
+
+The Hyprland configuration follows 12-factor app principles for maximum portability and maintainability:
+
+- **Variable-driven config**: All programs, colors, and settings defined as variables in `hyprland.conf`
+- **Modular structure**: Separate files for displays, autostart, environment, look, input, keybindings, and windows
+- **Environment variants**: Easy laptop/desktop switching with `hyprland-laptop.conf`
+- **Version controlled**: All changes tracked in git for easy rollback
+
+```bash
+# Example: hyprland.conf variables
+$terminal = kitty
+$browser = flatpak run app.zen_browser.zen
+$menu = rofi -show drun
+
+# Theme colors
+$active_border_color = rgba(89b4faff) rgba(89dcebee) 90deg
+$gaps_in = 0
+$rounding = 3
+```
+
+### Fish shell with VI keybindings
+
+Powerful Fish shell configuration with vim-style navigation:
+
+- **VI key bindings**: Navigate command line with vim motions
+- **Smart abbreviations**: Common git commands (`gits`, `gitc`, `gita`)
+- **Tool integrations**: Zoxide and Atuin for enhanced navigation
+- **12-factor design**: Environment-based configuration
+
+```fish
+# VI bindings enabled by default
+fish_vi_key_bindings insert
+
+# Smart abbreviations
+abbr --add --global gits 'git status'
+abbr --add --global gitc 'git commit'
+```
+
+### LazyVim-based Neovim
+
+Modern Neovim setup built on LazyVim starter template:
+
+- Pre-configured LSP support
+- Lazy plugin loading
+- Extensible and maintainable
+
+### Catppuccin Mocha themed Waybar
+
+Beautiful status bar with pill-style modules:
+
+- **Catppuccin Mocha theme**: Cohesive color scheme
+- **Pill-style modules**: Clean, modern design with 1px borders
+- **Toggle keybind**: Show/hide waybar with `Super+Shift+R`
+
+### GNU Stow-based installation
+
+Simple, elegant dotfile management using GNU Stow:
+
+- **Symlink-based**: Non-destructive installation
+- **Dotfiles support**: Automatic renaming of `dot-` prefix to `.`
+- **Selective installation**: Install only what you need
+
+```ini
+# .stowrc configuration
+--target=~
+--ignore=.stowrc
+--dotfiles
+--verbose=1
+```
+
+### Dual platform support
+
+Tested and documented for both major distributions:
+
+- **Fedora**: Full DNF installation instructions
+- **Arch Linux**: AUR package support with yay
+
+## What makes this unique
+
+This dotfiles setup stands out from typical configurations:
+
+1. **12-factor methodology**: Applied software engineering principles to configuration management
+2. **Modular by design**: Each component is independent and can be modified without affecting others
+3. **Documentation-first**: Every major component has its own README with setup instructions
+4. **Environment portability**: Easy switching between laptop/desktop/multi-monitor setups
+5. **Theme consistency**: Catppuccin Mocha throughout Hyprland, Waybar, Kitty, and Rofi
+6. **Git-tracked**: All changes versioned for easy rollback and collaboration
+
+## Quick start
+
+Get up and running in seconds:
+
+<Steps>
+  <Step title="Install with one command">
+    ```bash
+    curl -fsSL https://raw.githubusercontent.com/shawal-mbalire/root_home_shawal/main/install.sh | bash
+    ```
+  </Step>
+  <Step title="Install dependencies">
+    See the [requirements](/requirements) page for your distribution
+  </Step>
+  <Step title="Reload Hyprland">
+    ```bash
+    hyprctl reload
+    ```
+  </Step>
+</Steps>
+
+<Tip>
+  For manual installation or customization, check out the detailed [installation guide](/installation).
+</Tip>
+
+## Project structure
+
+The repository is organized for clarity and maintainability:
+
+```
+~/.config/
+├── hypr/                  # Hyprland configuration
+│   ├── hyprland.conf     # Main config with variables
+│   ├── modules/          # Modular config files
+│   ├── scripts/          # Helper scripts
+│   └── dependencies.txt  # Required packages
+├── waybar/               # Status bar configuration
+├── fish/                 # Fish shell setup
+│   ├── config.fish      # Main configuration
+│   └── functions/       # Custom functions
+├── nvim/                 # LazyVim configuration
+├── kitty/                # Terminal emulator
+├── rofi/                 # Application launcher
+└── mako/                 # Notification daemon
+```
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Installation guide" icon="rocket" href="/installation">
+    Follow the complete installation process
+  </Card>
+  <Card title="System requirements" icon="server" href="/requirements">
+    Verify your system has all dependencies
+  </Card>
+</CardGroup>

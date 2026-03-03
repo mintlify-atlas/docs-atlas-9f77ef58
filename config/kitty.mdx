@@ -1,0 +1,335 @@
+---
+title: Kitty Terminal Configuration
+description: Minimal Kitty terminal configuration with Catppuccin Mocha theme
+---
+
+## Overview
+
+A clean, minimal Kitty terminal configuration featuring the Catppuccin Mocha theme, custom fonts, and window decorations disabled for a modern look.
+
+## Configuration
+
+Location: `~/.config/kitty/kitty.conf`
+
+### macOS Compatibility
+
+```conf
+macos_option_as_alt true
+```
+
+Treats Option key as Alt on macOS for better key binding compatibility.
+
+### Window Appearance
+
+```conf
+hide_window_decorations yes
+window_padding_width 10
+```
+
+- Removes title bar and borders
+- Adds 10px padding around terminal content
+
+### Font Configuration
+
+```conf
+font_family family="Sono Monospace"
+font_size 14
+bold_font auto
+italic_font auto
+bold_italic_font auto
+```
+
+**Font**: Sono Monospace at 14pt with automatic bold/italic variants.
+
+### Window Size
+
+```conf
+initial_window_width 1920
+initial_window_height 1080
+```
+
+Starts with a large default window (1920x1080).
+
+## Theme
+
+### Catppuccin Mocha
+
+```conf
+# BEGIN_KITTY_THEME
+# Catppuccin-Mocha
+include current-theme.conf
+# END_KITTY_THEME
+```
+
+The Catppuccin Mocha theme is included from `current-theme.conf`.
+
+### Installing Themes
+
+Kitty themes can be installed via the official theme repository:
+
+<Tabs>
+  <Tab title="Interactive">
+    ```bash
+    kitty +kitten themes
+    ```
+    
+    Browse and apply themes interactively.
+  </Tab>
+  <Tab title="Manual">
+    1. Download theme file to `~/.config/kitty/`
+    2. Update `current-theme.conf` symlink or include statement
+    3. Reload Kitty: `Ctrl+Shift+F5`
+  </Tab>
+</Tabs>
+
+## Customization
+
+### Changing Font
+
+Replace the font family:
+
+```conf
+font_family family="JetBrains Mono"
+# or
+font_family family="Fira Code"
+```
+
+Install the font system-wide first:
+
+```bash
+# Fedora
+sudo dnf install jetbrains-mono-fonts
+sudo dnf install fira-code-fonts
+```
+
+### Adjusting Font Size
+
+```conf
+font_size 16  # Larger
+font_size 12  # Smaller
+```
+
+Or use keybindings:
+- `Ctrl+Shift++` - Increase font size
+- `Ctrl+Shift+-` - Decrease font size
+- `Ctrl+Shift+Backspace` - Reset to default
+
+### Window Padding
+
+```conf
+window_padding_width 15  # More padding
+window_padding_width 5   # Less padding
+window_padding_width 0   # No padding
+```
+
+### Window Decorations
+
+To show decorations:
+
+```conf
+hide_window_decorations no
+```
+
+Or hide only the title bar:
+
+```conf
+hide_window_decorations titlebar-only
+```
+
+## Essential Keybindings
+
+### Window Management
+
+| Keybinding | Action |
+|------------|--------|
+| `Ctrl+Shift+Enter` | New window |
+| `Ctrl+Shift+N` | New OS window |
+| `Ctrl+Shift+W` | Close window |
+| `Ctrl+Shift+]` | Next window |
+| `Ctrl+Shift+[` | Previous window |
+
+### Tab Management
+
+| Keybinding | Action |
+|------------|--------|
+| `Ctrl+Shift+T` | New tab |
+| `Ctrl+Shift+Q` | Close tab |
+| `Ctrl+Shift+Right` | Next tab |
+| `Ctrl+Shift+Left` | Previous tab |
+| `Ctrl+Shift+Alt+T` | Rename tab |
+
+### Scrollback
+
+| Keybinding | Action |
+|------------|--------|
+| `Ctrl+Shift+H` | Show scrollback in pager |
+| `Ctrl+Shift+G` | Show last command output |
+| `Ctrl+Shift+Up` | Scroll line up |
+| `Ctrl+Shift+Down` | Scroll line down |
+| `Ctrl+Shift+Page Up` | Scroll page up |
+| `Ctrl+Shift+Page Down` | Scroll page down |
+
+### Other
+
+| Keybinding | Action |
+|------------|--------|
+| `Ctrl+Shift+F5` | Reload config |
+| `Ctrl+Shift+F6` | Debug config |
+| `Ctrl+Shift+F11` | Toggle fullscreen |
+| `Ctrl+Shift+U` | Input Unicode character |
+| `Ctrl+Shift+C` | Copy to clipboard |
+| `Ctrl+Shift+V` | Paste from clipboard |
+
+## Advanced Configuration
+
+### Custom Keybindings
+
+Add to `kitty.conf`:
+
+```conf
+map ctrl+shift+r load_config_file
+map ctrl+shift+e launch --type=tab nvim ~/.config/kitty/kitty.conf
+```
+
+### Cursor Customization
+
+```conf
+cursor_shape block
+cursor_blink_interval 0  # Disable blinking
+cursor_stop_blinking_after 15.0
+```
+
+### Background Opacity
+
+```conf
+background_opacity 0.95
+```
+
+Requires compositor support (works with Hyprland).
+
+### Tab Bar Style
+
+```conf
+tab_bar_style powerline
+tab_powerline_style round
+```
+
+Or:
+
+```conf
+tab_bar_style fade
+tab_fade 0.25 0.5 0.75 1
+```
+
+### Shell Integration
+
+```conf
+shell_integration enabled
+```
+
+Enables features like:
+- Jump to previous/next prompt
+- Copy last command output
+- Semantic understanding of shell output
+
+## Performance
+
+### Rendering
+
+```conf
+repaint_delay 10
+input_delay 3
+sync_to_monitor yes
+```
+
+### Scrollback Buffer
+
+```conf
+scrollback_lines 10000
+scrollback_pager less --chop-long-lines --RAW-CONTROL-CHARS +INPUT_LINE_NUMBER
+```
+
+## FAQ
+
+<Accordion title="Font not working?">
+  Ensure the font is installed system-wide:
+  
+  ```bash
+  fc-list | grep -i "sono"
+  ```
+  
+  If not found, install via package manager:
+  
+  ```bash
+  sudo dnf install sono-fonts
+  ```
+</Accordion>
+
+<Accordion title="How to reload config?">
+  Press `Ctrl+Shift+F5` or run:
+  
+  ```bash
+  kill -SIGUSR1 $(pgrep kitty)
+  ```
+</Accordion>
+
+<Accordion title="Colors look wrong?">
+  Check your theme file:
+  
+  ```bash
+  cat ~/.config/kitty/current-theme.conf
+  ```
+  
+  Ensure it's a valid Kitty theme. Try switching themes:
+  
+  ```bash
+  kitty +kitten themes
+  ```
+</Accordion>
+
+<Accordion title="How to change cursor shape?">
+  Add to `kitty.conf`:
+  
+  ```conf
+  cursor_shape beam      # I-beam (vertical line)
+  cursor_shape underline # Underline
+  cursor_shape block     # Block (default)
+  ```
+  
+  Reload: `Ctrl+Shift+F5`
+</Accordion>
+
+<Accordion title="Terminal feels slow?">
+  Try disabling ligatures if using a font with ligatures:
+  
+  ```conf
+  disable_ligatures always
+  ```
+  
+  Or adjust performance settings:
+  
+  ```conf
+  repaint_delay 5
+  input_delay 1
+  ```
+</Accordion>
+
+## Configuration Location
+
+```
+~/.config/kitty/
+├── kitty.conf
+└── current-theme.conf
+```
+
+## Theme Resources
+
+- [Kitty Themes Repository](https://github.com/kovidgoyal/kitty-themes)
+- [Catppuccin for Kitty](https://github.com/catppuccin/kitty)
+- Install themes: `kitty +kitten themes`
+
+## Related Configuration
+
+- See [Fish Shell](/config/fish) for shell configuration
+- See [Tmux](/config/tmux) for terminal multiplexer
+- See [Hyprland](/config/hyprland) for window manager

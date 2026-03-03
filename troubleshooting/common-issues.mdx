@@ -1,0 +1,440 @@
+---
+title: Common Issues
+description: Solutions to common problems you may encounter
+---
+
+## Setup Issues
+
+<AccordionGroup>
+  <Accordion title="Tmux plugins not loading" icon="terminal">
+    **Error:** Tmux starts but plugins (tpm, catppuccin, etc.) are not working or showing errors.
+
+    **Solution:**
+
+    The Tmux Plugin Manager (tpm) needs to be installed manually. Run:
+
+    ```bash
+    git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm
+    ```
+
+    After installation:
+    1. Start tmux or reload your configuration: `tmux source ~/.config/tmux/tmux.conf`
+    2. Press `Ctrl+Space` then `I` (capital i) to install plugins
+    3. Restart tmux sessions for changes to take effect
+
+    **Reference:** The configuration loads tpm at the end of `tmux.conf:130`
+  </Accordion>
+
+  <Accordion title="Polkit authentication prompts not appearing" icon="shield-check">
+    **Error:** Applications requiring elevated permissions fail silently or timeout.
+
+    **Solution:**
+
+    Install the Hyprland polkit authentication agent:
+
+    ```bash
+    sudo dnf install hyprpolkitagent
+    ```
+
+    The agent is configured to start automatically in `modules/autostart.conf:20`:
+    ```conf
+    exec-once = systemctl --user start hyprpolkitagent
+    ```
+
+    If still not working, verify the service is running:
+    ```bash
+    systemctl --user status hyprpolkitagent
+    ```
+  </Accordion>
+
+  <Accordion title="Font rendering issues or missing icons" icon="font">
+    **Error:** Icons appear as boxes, waybar modules show `[]` instead of symbols, or fonts look incorrect.
+
+    **Solution:**
+
+    Install the required Nerd Fonts:
+
+    **For Arch Linux:**
+    ```bash
+    yay -S ttf-hack-nerd
+    ```
+
+    **For Fedora:**
+    ```bash
+    sudo dnf copr enable zawertun/hack-fonts
+    sudo dnf install hack-fonts
+    ```
+
+    **JetBrainsMono Nerd Font (alternative):**
+    ```bash
+    curl -OL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.tar.xz
+    tar -xf JetBrainsMono.tar.xz -C ~/.local/share/fonts/
+    fc-cache -fv
+    ```
+
+    After installation, log out and log back in to ensure fonts are loaded.
+  </Accordion>
+
+  <Accordion title="Stow conflicts with existing files" icon="files">
+    **Error:** `stow` command fails with "existing target is not owned by stow" errors.
+
+    **Solution:**
+
+    Backup and remove conflicting files before running stow:
+
+    ```bash
+    # Example for a specific conflict
+    mv ~/.config/hypr ~/.config/hypr.backup
+    
+    # Then re-run stow from your dotfiles directory
+    stow .
+    ```
+
+    **Understanding .stowrc:**
+    The `.stowrc` configuration uses:
+    - `--target=~` - Installs to home directory
+    - `--dotfiles` - Converts `dot-` prefix to `.` in target
+    - `--ignore=.stowrc` - Doesn't symlink the stow config itself
+  </Accordion>
+</AccordionGroup>
+
+## Hyprland Issues
+
+<AccordionGroup>
+  <Accordion title="Display not detected or incorrect resolution" icon="display">
+    **Error:** External monitor not showing up, wrong resolution, or positioned incorrectly.
+
+    **Solution:**
+
+    1. List available outputs:
+    ```bash
+    hyprctl monitors
+    ```
+
+    2. Check your monitor configuration in the appropriate config file:
+       - Desktop: `~/.config/hypr/modules/displays.conf`
+       - Laptop: `~/.config/hypr/modules/displays-laptop.conf`
+
+    3. The default configurations use:
+       - Primary: `eDP-1,1920x1200@60,0x0,1`
+       - Secondary: `HDMI-A-2,1600x900@60,1921x0,1`
+
+    4. Update the monitor variables in your config:
+    ```conf
+    $primary_monitor = YOUR-OUTPUT,1920x1080@60,0x0,1
+    ```
+
+    5. Reload Hyprland: `Super + Shift + R` or `hyprctl reload`
+  </Accordion>
+
+  <Accordion title="Hyprland fails to start or crashes on login" icon="triangle-exclamation">
+    **Error:** Black screen after login, or immediate crash to TTY.
+
+    **Solution:**
+
+    1. Check Hyprland logs:
+    ```bash
+    cat /tmp/hypr/$(ls -t /tmp/hypr/ | head -1)/hyprland.log
+    ```
+
+    2. Common causes:
+       - **Missing dependencies:** Verify all autostart applications are installed
+       - **Invalid config syntax:** Check for typos in `hyprland.conf`
+       - **Missing module files:** Ensure all imported modules exist
+
+    3. Test with minimal config:
+    ```bash
+    # Temporarily rename your config
+    mv ~/.config/hypr/hyprland.conf ~/.config/hypr/hyprland.conf.backup
+    
+    # Start with defaults
+    Hyprland
+    ```
+
+    4. If working, gradually re-enable modules to identify the problematic one.
+  </Accordion>
+
+  <Accordion title="Workspace switching not working" icon="table-columns">
+    **Error:** Keybindings for workspace switching have no effect.
+
+    **Solution:**
+
+    1. Verify keybindings are loaded:
+    ```bash
+    hyprctl binds | grep workspace
+    ```
+
+    2. Check `modules/keybindings.conf` is properly sourced in your main config
+
+    3. Test if the mod key is working:
+    ```bash
+    # Check what $mainMod is set to (should be SUPER)
+    grep mainMod ~/.config/hypr/hyprland.conf
+    ```
+
+    4. Reload configuration: `Super + Shift + R`
+  </Accordion>
+
+  <Accordion title="Autostart applications not launching" icon="rocket">
+    **Error:** Waybar, notification daemon, or other autostart apps don't start with Hyprland.
+
+    **Solution:**
+
+    Check `modules/autostart.conf` for the list of autostart applications:
+    - `nm-applet` - Network manager
+    - `blueman-applet` - Bluetooth
+    - `mako` - Notifications
+    - `hyprpolkitagent` - Authentication
+    - `hyprpaper` - Wallpaper
+
+    Verify each application is installed:
+    ```bash
+    which nm-applet blueman-applet mako hyprpaper
+    ```
+
+    If missing, install the required packages:
+    ```bash
+    sudo dnf install network-manager-applet blueman mako hyprpaper
+    ```
+
+    Check for errors in the Hyprland log after login.
+  </Accordion>
+</AccordionGroup>
+
+## Waybar Issues
+
+<AccordionGroup>
+  <Accordion title="Waybar not appearing or invisible" icon="bars">
+    **Error:** Waybar doesn't show after login or becomes invisible.
+
+    **Solution:**
+
+    1. Check if waybar is running:
+    ```bash
+    pgrep waybar
+    ```
+
+    2. Manually start waybar to see errors:
+    ```bash
+    killall waybar
+    waybar
+    ```
+
+    3. Check the configuration syntax:
+    ```bash
+    waybar -c ~/.config/waybar/config.jsonc -s ~/.config/waybar/style.css
+    ```
+
+    4. Verify dependencies are installed:
+    ```bash
+    sudo dnf install waybar jetbrains-mono-fonts sono-fonts pavucontrol brightnessctl
+    ```
+  </Accordion>
+
+  <Accordion title="Waybar modules showing errors or missing data" icon="circle-exclamation">
+    **Error:** Specific waybar modules display errors, show "N/A", or are empty.
+
+    **Solution:**
+
+    Common module issues:
+
+    **Network module:**
+    - Requires `network-manager-applet`
+    - Check: `nmcli device status`
+
+    **Power profile module:**
+    - Requires `power-profiles-daemon`
+    - Install: `sudo dnf install power-profiles-daemon`
+    - Enable: `systemctl enable --now power-profiles-daemon`
+
+    **Battery module:**
+    - Only works on laptops
+    - Check battery path: `ls /sys/class/power_supply/`
+
+    Check waybar logs:
+    ```bash
+    journalctl --user -u waybar -f
+    ```
+  </Accordion>
+
+  <Accordion title="How to reload waybar after configuration changes" icon="rotate">
+    **Solution:**
+
+    **Method 1: Kill and restart (hard reload)**
+    ```bash
+    killall waybar && waybar &
+    ```
+
+    **Method 2: Soft reload (SIGUSR2)**
+    ```bash
+    killall -SIGUSR2 waybar
+    ```
+
+    **Method 3: Using Justfile**
+    If you have `just` installed:
+    ```bash
+    cd ~/.config/waybar
+    just reload    # Soft reload
+    just restart   # Hard restart
+    ```
+
+    **Method 4: Hyprland keybind**
+    Use `Super + Shift + R` if configured in your keybindings.
+
+    **Note:** Hard reload is needed for structural config changes, soft reload works for style updates.
+  </Accordion>
+</AccordionGroup>
+
+## Application Issues
+
+<AccordionGroup>
+  <Accordion title="Flatpak applications not launching" icon="box">
+    **Error:** Flatpak apps like Zen Browser or Quran Companion don't start.
+
+    **Solution:**
+
+    1. Verify the application is installed:
+    ```bash
+    flatpak list
+    ```
+
+    2. Install if missing:
+    ```bash
+    # Zen Browser
+    flatpak install flathub app.zen_browser.zen
+    
+    # Or your specific application
+    flatpak search <app-name>
+    ```
+
+    3. Check permissions:
+    ```bash
+    flatpak override --user --show app.zen_browser.zen
+    ```
+
+    4. Run from terminal to see errors:
+    ```bash
+    flatpak run app.zen_browser.zen
+    ```
+  </Accordion>
+
+  <Accordion title="Rofi menu not showing or wrong theme" icon="list">
+    **Error:** Application launcher doesn't appear or uses default theme instead of gridmenu.
+
+    **Solution:**
+
+    The configuration uses a custom rofi theme. Verify:
+
+    1. Check rofi is installed:
+    ```bash
+    which rofi
+    ```
+
+    2. Test the exact command from config:
+    ```bash
+    rofi -show drun -theme launchers/gridmenu -drun-icon-theme "BeautySolar"
+    ```
+
+    3. If theme is missing, check your rofi themes directory:
+    ```bash
+    ls ~/.config/rofi/launchers/
+    ```
+
+    4. The theme path should exist or use a different installed theme:
+    ```bash
+    rofi-theme-selector
+    ```
+  </Accordion>
+
+  <Accordion title="Clipboard history not working" icon="clipboard">
+    **Error:** Clipboard manager (cliphist) doesn't store or recall clipboard history.
+
+    **Solution:**
+
+    The autostart configuration includes:
+    ```conf
+    exec-once = wl-paste --watch cliphist store &
+    ```
+
+    1. Install cliphist:
+    ```bash
+    # Arch
+    yay -S cliphist
+    
+    # Fedora (may need to build from source)
+    go install go.senan.xyz/cliphist@latest
+    ```
+
+    2. Verify wl-paste is running:
+    ```bash
+    pgrep -a wl-paste
+    ```
+
+    3. Test clipboard storage:
+    ```bash
+    echo "test" | wl-copy
+    cliphist list
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Configuration Issues
+
+<AccordionGroup>
+  <Accordion title="Changes to config files not taking effect" icon="pen-to-square">
+    **Solution:**
+
+    After modifying configuration files:
+
+    **For Hyprland:**
+    ```bash
+    hyprctl reload
+    ```
+    Or use keybind: `Super + Shift + R`
+
+    **For Waybar:**
+    ```bash
+    killall waybar && waybar &
+    ```
+
+    **For Tmux:**
+    ```bash
+    tmux source ~/.config/tmux/tmux.conf
+    ```
+    Or inside tmux: `Ctrl+Space` then `:source ~/.config/tmux/tmux.conf`
+
+    **For complete reload:**
+    Log out and log back in to Hyprland
+  </Accordion>
+
+  <Accordion title="Local customizations being overwritten" icon="code-merge">
+    **Solution:**
+
+    Use local override files that are gitignored:
+
+    **Tmux local config:**
+    Create `~/.config/tmux/tmux.local.conf` for your customizations.
+    This file is automatically sourced at `tmux.conf:127`:
+    ```conf
+    if-shell "[ -f ~/.config/tmux/tmux.local.conf ]" 'source ~/.config/tmux/tmux.local.conf'
+    ```
+
+    **Hyprland local config:**
+    Add a source line at the end of your `hyprland.conf`:
+    ```conf
+    source = ~/.config/hypr/local.conf
+    ```
+
+    This follows the 12-factor approach of separating config from environment-specific settings.
+  </Accordion>
+</AccordionGroup>
+
+## Getting More Help
+
+If your issue isn't covered here:
+
+1. Check the [FAQ](/troubleshooting/faq) for additional questions
+2. Review the Hyprland wiki: https://wiki.hyprland.org
+3. Check application-specific logs in `/tmp` or `~/.local/share/`
+4. Run applications from terminal to see error output
+5. Review your specific module configuration in `~/.config/hypr/modules/`

@@ -1,0 +1,573 @@
+---
+title: Frequently Asked Questions
+description: Common questions about the dotfiles configuration
+---
+
+## General Questions
+
+<AccordionGroup>
+  <Accordion title="Why use GNU Stow for managing dotfiles?" icon="link">
+    GNU Stow is used because it creates symbolic links from a centralized dotfiles repository to your home directory, making it easy to:
+
+    - **Version control:** All configs in one git repository
+    - **Easy deployment:** Single command to install all configs
+    - **Selective installation:** Choose which configs to install
+    - **Safe updates:** Changes are immediately reflected without copying
+
+    **Configuration (from .stowrc):**
+    ```conf
+    --target=~        # Install symlinks to home directory
+    --ignore=.stowrc  # Don't symlink the stow config itself
+    --dotfiles        # Convert 'dot-' prefix to '.'
+    --verbose=1       # Show what's being done
+    ```
+
+    The `--dotfiles` flag is particularly useful because it allows files like `dot-config/` in the repository to become `.config/` in your home directory, making them visible in git without being hidden.
+
+    **Example:**
+    - Repository: `dot-config/hypr/hyprland.conf`
+    - Home directory: `~/.config/hypr/hyprland.conf` (symlinked)
+  </Accordion>
+
+  <Accordion title="What is the 12-factor design approach mentioned in the configs?" icon="layer-group">
+    The 12-factor approach (from 12factor.net) is a methodology for building maintainable applications. In the context of these dotfiles:
+
+    **Separation of Configuration and Code:**
+    - Base configurations are tracked in git
+    - Environment-specific settings go in local files (not tracked)
+    - Local files are automatically loaded if they exist
+
+    **Example from tmux.conf:127:**
+    ```conf
+    # Load local configuration if it exists (Config factor)
+    if-shell "[ -f ~/.config/tmux/tmux.local.conf ]" 'source ~/.config/tmux/tmux.local.conf'
+    ```
+
+    **Benefits:**
+    - Same base config works on multiple machines
+    - Machine-specific tweaks in local files
+    - Base config stays clean and portable
+    - No risk of committing sensitive local settings
+
+    **Recommended practice:**
+    - Keep shared settings in tracked files
+    - Put machine-specific settings in `.local.conf` files
+    - Add `.local.conf` to `.gitignore`
+  </Accordion>
+
+  <Accordion title="Can I use parts of this config without installing everything?" icon="puzzle-piece">
+    Yes! The configuration is modular and can be used selectively.
+
+    **Option 1: Selective Stow**
+    Instead of installing all dotfiles, stow specific directories:
+    ```bash
+    # Only install tmux config
+    stow dot-config/tmux
+    
+    # Only install hypr config
+    stow dot-config/hypr
+    ```
+
+    **Option 2: Copy Individual Files**
+    Copy specific config files you want:
+    ```bash
+    cp -r dot-config/tmux ~/.config/
+    ```
+
+    **Option 3: Use as Reference**
+    Browse the repository and copy snippets to your existing configs:
+    - Tmux keybindings from `tmux.conf`
+    - Hyprland animations from `modules/look.conf`
+    - Waybar modules from `waybar/config.jsonc`
+
+    **Modular Structure:**
+    Each application's config is independent:
+    - `dot-config/tmux/` - Complete tmux setup
+    - `dot-config/hypr/` - Hyprland window manager
+    - `dot-config/waybar/` - Status bar
+    - `dot-config/rofi/` - Application launcher
+
+    Dependencies between configs are minimal, making it easy to pick what you need.
+  </Accordion>
+</AccordionGroup>
+
+## Configuration Questions
+
+<AccordionGroup>
+  <Accordion title="How do I switch between laptop and desktop configs?" icon="laptop">
+    The repository includes separate configuration files for laptop and desktop setups.
+
+    **Current Setup:**
+    - Desktop config: `~/.config/hypr/hyprland.conf`
+    - Laptop config: `~/.config/hypr/modules/hyprland-laptop.conf`
+
+    **Key Differences:**
+
+    | Setting | Desktop | Laptop |
+    |---------|---------|--------|
+    | Primary Monitor | eDP-1 | eDP-1 |
+    | Secondary Monitor | HDMI-A-2 | Disabled |
+    | Gaps (inner) | 0px | 4px |
+    | Gaps (outer) | 0px | 5px |
+    | Border Color | Blue gradient | Cyan/Green gradient |
+    | Display Module | displays.conf | displays-laptop.conf |
+
+    **Method 1: Symlink Switching (Recommended)**
+    ```bash
+    # Switch to laptop config
+    cd ~/.config/hypr
+    mv hyprland.conf hyprland-desktop.conf
+    ln -s modules/hyprland-laptop.conf hyprland.conf
+    
+    # Switch back to desktop
+    rm hyprland.conf
+    mv hyprland-desktop.conf hyprland.conf
+    ```
+
+    **Method 2: Environment-Based**
+    Create a script in your shell profile:
+    ```bash
+    # In ~/.bashrc or ~/.zshrc
+    if [ -f /sys/class/power_supply/BAT0 ]; then
+        # Laptop detected
+        export HYPR_CONFIG="laptop"
+    else
+        # Desktop
+        export HYPR_CONFIG="desktop"
+    fi
+    ```
+
+    **Method 3: Local Override**
+    Keep the base config and override specific settings in a local file sourced at the end.
+
+    After switching, reload Hyprland: `Super + Shift + R`
+  </Accordion>
+
+  <Accordion title="How do I customize the Catppuccin theme colors?" icon="palette">
+    The configuration uses Catppuccin Mocha theme across multiple applications.
+
+    **Tmux (tmux.conf:51):**
+    ```conf
+    set -g @catppuccin_flavour 'mocha'
+    ```
+    Available flavours: `latte`, `frappe`, `macchiato`, `mocha`
+
+    **Hyprland Border Colors:**
+    Edit variables in `hyprland.conf`:
+    ```conf
+    # Desktop (line 17)
+    $active_border_color = rgba(89b4faff) rgba(89dcebee) 90deg
+    
+    # Laptop (line 17)
+    $active_border_color = rgba(33ccffee) rgba(00ff99ee) 180deg
+    ```
+
+    **Waybar:**
+    Catppuccin colors are defined in `waybar/style.css`. Modify CSS variables:
+    ```css
+    @define-color base   #1e1e2e;
+    @define-color mantle #181825;
+    @define-color crust  #11111b;
+    ```
+
+    **Custom Theme:**
+    To use a completely different theme:
+    1. Update tmux theme plugin
+    2. Modify Hyprland color variables
+    3. Replace waybar CSS
+    4. Update rofi theme path
+  </Accordion>
+
+  <Accordion title="Where are application logs located?" icon="file-lines">
+    Different applications store logs in different locations:
+
+    **Hyprland:**
+    ```bash
+    # Current session log
+    cat /tmp/hypr/$(ls -t /tmp/hypr/ | head -1)/hyprland.log
+    
+    # List all session logs
+    ls -lt /tmp/hypr/
+    ```
+
+    **Waybar:**
+    ```bash
+    # If run as systemd service
+    journalctl --user -u waybar -f
+    
+    # If run manually, check stdout/stderr
+    waybar 2>&1 | tee ~/waybar.log
+    ```
+
+    **Tmux:**
+    Tmux doesn't have separate logs, but plugin errors appear in tmux status:
+    ```bash
+    # Check tpm installation
+    ls ~/.config/tmux/plugins/tpm
+    ```
+
+    **System logs:**
+    ```bash
+    # General system log
+    journalctl -xe
+    
+    # User session logs
+    journalctl --user -xe
+    
+    # Display manager logs (GDM/SDDM)
+    journalctl -u gdm -f
+    ```
+
+    **X11/Wayland session logs:**
+    ```bash
+    # Wayland session
+    cat ~/.local/share/wayland-sessions/
+    
+    # Check environment
+    echo $XDG_SESSION_TYPE  # Should show 'wayland'
+    ```
+  </Accordion>
+
+  <Accordion title="How do I reload configurations without logging out?" icon="rotate">
+    Most configurations can be reloaded without a full logout:
+
+    **Hyprland:**
+    ```bash
+    # Reload config
+    hyprctl reload
+    
+    # Or use keybind
+    Super + Shift + R
+    
+    # Restart Hyprland (preserves session)
+    hyprctl dispatch exit
+    ```
+
+    **Waybar:**
+    ```bash
+    # Hard reload (recommended for config changes)
+    killall waybar && waybar &
+    
+    # Soft reload (style changes only)
+    killall -SIGUSR2 waybar
+    
+    # Using just command
+    cd ~/.config/waybar && just reload
+    ```
+
+    **Tmux:**
+    ```bash
+    # From outside tmux
+    tmux source ~/.config/tmux/tmux.conf
+    
+    # From inside tmux
+    # Press: Ctrl+Space then type:
+    :source ~/.config/tmux/tmux.conf
+    
+    # Reload all tmux sessions
+    tmux list-sessions -F '#{session_name}' | xargs -I {} tmux send-keys -t {} 'tmux source ~/.config/tmux/tmux.conf' Enter
+    ```
+
+    **Environment Variables:**
+    ```bash
+    # Source shell config
+    source ~/.bashrc  # or ~/.zshrc
+    
+    # For Hyprland env vars, reload is needed
+    hyprctl reload
+    ```
+
+    **When Full Logout is Required:**
+    - Display manager configuration changes
+    - Systemd user service modifications
+    - Major Hyprland structural changes
+    - Graphics driver updates
+  </Accordion>
+</AccordionGroup>
+
+## Installation & Updates
+
+<AccordionGroup>
+  <Accordion title="How do I keep my configs updated with upstream changes?" icon="download">
+    If you forked or cloned this repository, you can pull updates:
+
+    **Method 1: Direct Pull (if you haven't made changes)**
+    ```bash
+    cd ~/dotfiles  # or wherever you cloned it
+    git pull origin main
+    ```
+
+    **Method 2: Merge Upstream (if you've customized)**
+    ```bash
+    # Add upstream remote (once)
+    git remote add upstream https://github.com/shawal-mbalire/root_home_shawal
+    
+    # Fetch and merge updates
+    git fetch upstream
+    git merge upstream/main
+    
+    # Resolve any conflicts with your customizations
+    ```
+
+    **Method 3: Cherry-pick Specific Changes**
+    ```bash
+    # View upstream commits
+    git fetch upstream
+    git log upstream/main
+    
+    # Cherry-pick specific commits
+    git cherry-pick <commit-hash>
+    ```
+
+    **Best Practice:**
+    - Keep your customizations in `.local.conf` files
+    - Document your changes in a separate file
+    - Use git branches for experimental changes
+    - Review changes before merging: `git diff upstream/main`
+  </Accordion>
+
+  <Accordion title="What dependencies need to be installed?" icon="box-open">
+    The configuration has several dependencies organized by component:
+
+    **Core (Required for Hyprland):**
+    ```bash
+    # Arch
+    yay -S hyprland-git wofi drun waybar
+    
+    # Fedora
+    sudo dnf install hyprland waybar wofi
+    ```
+
+    **Fonts (Required for proper rendering):**
+    ```bash
+    # Fedora
+    sudo dnf copr enable zawertun/hack-fonts
+    sudo dnf install hack-fonts jetbrains-mono-fonts
+    ```
+
+    **Waybar Dependencies:**
+    ```bash
+    sudo dnf install waybar jetbrains-mono-fonts sono-fonts pavucontrol brightnessctl
+    ```
+
+    **Optional but Recommended:**
+    ```bash
+    sudo dnf install hyprshot foot network-manager-applet power-profiles-daemon
+    ```
+
+    **Authentication:**
+    ```bash
+    sudo dnf install hyprpolkitagent
+    ```
+
+    **Tmux:**
+    ```bash
+    # Tmux itself
+    sudo dnf install tmux
+    
+    # Plugin manager (manual)
+    git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm
+    ```
+
+    **Clipboard Manager:**
+    ```bash
+    # Arch
+    yay -S cliphist
+    
+    # Or build from source
+    go install go.senan.xyz/cliphist@latest
+    ```
+
+    **Quick Install (Fedora):**
+    Use the waybar Justfile:
+    ```bash
+    cd ~/.config/waybar
+    just install        # Core dependencies
+    just install-extra  # Optional dependencies
+    ```
+  </Accordion>
+
+  <Accordion title="How do I uninstall or remove these configs?" icon="trash">
+    Since the configs are symlinked with GNU Stow, removal is clean:
+
+    **Method 1: Using Stow (Recommended)**
+    ```bash
+    cd ~/dotfiles  # Your dotfiles repository
+    stow -D .      # Remove all symlinks
+    ```
+
+    **Method 2: Remove Specific Configs**
+    ```bash
+    # Remove only hypr config
+    stow -D dot-config/hypr
+    
+    # Remove only tmux config
+    stow -D dot-config/tmux
+    ```
+
+    **Method 3: Manual Removal**
+    Since they're symlinks, you can just delete them:
+    ```bash
+    rm ~/.config/hypr
+    rm ~/.config/tmux
+    rm ~/.config/waybar
+    # etc.
+    ```
+
+    **Verify Removal:**
+    ```bash
+    # Check if symlinks are gone
+    ls -la ~/.config/hypr
+    
+    # Should show: No such file or directory
+    ```
+
+    **Clean Up:**
+    ```bash
+    # Remove plugin directories
+    rm -rf ~/.config/tmux/plugins
+    
+    # Remove dotfiles repository
+    rm -rf ~/dotfiles
+    ```
+
+    **Note:** Your original configs (if backed up) can be restored:
+    ```bash
+    mv ~/.config/hypr.backup ~/.config/hypr
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Advanced Questions
+
+<AccordionGroup>
+  <Accordion title="How do I add custom keybindings to Hyprland?" icon="keyboard">
+    Keybindings are defined in `~/.config/hypr/modules/keybindings.conf`.
+
+    **To add custom bindings without modifying the base file:**
+
+    1. Create a local keybindings file:
+    ```bash
+    touch ~/.config/hypr/modules/keybindings-local.conf
+    ```
+
+    2. Add your custom bindings:
+    ```conf
+    # Example custom keybindings
+    bind = $mainMod, T, exec, thunar
+    bind = $mainMod SHIFT, S, exec, hyprshot -m region
+    bind = $mainMod, V, exec, cliphist list | wofi -dmenu | cliphist decode | wl-copy
+    ```
+
+    3. Source it in `hyprland.conf`:
+    ```conf
+    # At the end of your imports section
+    source = modules/keybindings-local.conf
+    ```
+
+    4. Reload Hyprland: `Super + Shift + R`
+
+    **View all current bindings:**
+    ```bash
+    hyprctl binds
+    ```
+  </Accordion>
+
+  <Accordion title="Can I use this config on multiple machines with different hardware?" icon="server">
+    Yes! The configuration is designed to be portable:
+
+    **1. Use the laptop/desktop variants:**
+    - Symlink the appropriate config file for each machine
+    - See "How do I switch between laptop and desktop configs?" above
+
+    **2. Create machine-specific local configs:**
+    ```bash
+    # On machine 1
+    echo 'source = ~/.config/hypr/machine1.conf' >> ~/.config/hypr/hyprland.conf
+    
+    # On machine 2
+    echo 'source = ~/.config/hypr/machine2.conf' >> ~/.config/hypr/hyprland.conf
+    ```
+
+    **3. Use hostname-based loading:**
+    Add to your `hyprland.conf`:
+    ```bash
+    exec-once = [ -f ~/.config/hypr/$(hostname).conf ] && source ~/.config/hypr/$(hostname).conf
+    ```
+
+    **4. Git branch per machine:**
+    ```bash
+    # Create machine-specific branch
+    git checkout -b machine1
+    
+    # Make machine-specific changes
+    # Merge updates from main when needed
+    git merge main
+    ```
+
+    **Environment Variables:**
+    The config already separates hardware-agnostic settings (animations, keybindings) from hardware-specific ones (monitors, input devices).
+  </Accordion>
+
+  <Accordion title="How do I debug Waybar module scripts?" icon="bug">
+    Waybar includes custom scripts that may need debugging:
+
+    **Scripts in config:**
+    - `~/.config/waybar/toggle_temp.sh`
+    - `~/.config/waybar/cycle-power-profile.sh`
+
+    **Debugging Steps:**
+
+    1. **Make scripts executable:**
+    ```bash
+    chmod +x ~/.config/waybar/*.sh
+    ```
+
+    2. **Test script directly:**
+    ```bash
+    bash -x ~/.config/waybar/cycle-power-profile.sh
+    ```
+
+    3. **Check script dependencies:**
+    ```bash
+    # For power profile script
+    which powerprofilesctl
+    powerprofilesctl list
+    ```
+
+    4. **View waybar output:**
+    ```bash
+    # Kill waybar and run in foreground
+    killall waybar
+    waybar 2>&1 | tee ~/waybar-debug.log
+    ```
+
+    5. **Validate JSON config:**
+    ```bash
+    # Check for syntax errors
+    jsonlint ~/.config/waybar/config.jsonc
+    ```
+
+    6. **Test module in isolation:**
+    Create a minimal config with just one module to test.
+
+    **Common Issues:**
+    - Missing shebangs (`#!/bin/bash`)
+    - Wrong permissions
+    - Missing dependencies (check script commands)
+    - Incorrect output format (waybar expects specific JSON/text)
+  </Accordion>
+</AccordionGroup>
+
+## Still Have Questions?
+
+If your question isn't answered here:
+
+1. Check the [Common Issues](/troubleshooting/common-issues) page
+2. Review configuration files in `~/.config/` for inline comments
+3. Consult application-specific documentation:
+   - [Hyprland Wiki](https://wiki.hyprland.org)
+   - [Waybar Wiki](https://github.com/Alexays/Waybar/wiki)
+   - [Tmux Manual](https://man.openbsd.org/tmux)
+4. Check the source repository README for updates
+5. Review git commit history for context on specific changes

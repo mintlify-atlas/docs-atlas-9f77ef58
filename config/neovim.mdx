@@ -1,0 +1,311 @@
+---
+title: Neovim Configuration
+description: LazyVim-based Neovim configuration with Catppuccin theme and custom keymaps
+---
+
+## Overview
+
+This Neovim configuration is built on [LazyVim](https://lazyvim.github.io/), a pre-configured Neovim setup that provides a solid foundation with sensible defaults and a plugin ecosystem.
+
+## LazyVim Base
+
+LazyVim provides:
+
+- Modern plugin management via [lazy.nvim](https://github.com/folke/lazy.nvim)
+- Pre-configured LSP, linting, and formatting
+- File explorer, fuzzy finder, and git integration
+- Catppuccin theme integration
+- Extensive keybindings
+
+Refer to the [LazyVim documentation](https://lazyvim.github.io/) for the full feature set and default keybindings.
+
+## Configuration Structure
+
+```
+~/.config/nvim/
+├── init.lua                    # Entry point
+├── lua/
+│   ├── config/
+│   │   ├── autocmds.lua       # Auto commands
+│   │   ├── keymaps.lua        # Custom keymaps
+│   │   ├── lazy.lua           # Lazy.nvim bootstrap
+│   │   └── options.lua        # Vim options
+│   └── plugins/
+│       ├── catppuccin.lua     # Theme configuration
+│       ├── core.lua           # Core plugin overrides
+│       └── neo-tree.lua       # File explorer config
+├── lazy-lock.json             # Plugin version lock
+└── stylua.toml                # Lua formatter config
+```
+
+## Entry Point
+
+The configuration starts simple:
+
+```lua
+-- init.lua
+require("config.lazy")
+```
+
+This bootstraps lazy.nvim and loads all configuration modules.
+
+## Custom Options
+
+Minimal options override LazyVim defaults:
+
+```lua
+-- lua/config/options.lua
+vim.g.root_spec = { "cwd" }
+```
+
+This sets the root directory detection to use the current working directory.
+
+## Custom Keymaps
+
+### File Explorer
+
+```lua
+vim.keymap.set("n", "<leader>e", "<cmd>Neotree<cr>", { desc = "Toggle Neo-tree" })
+```
+
+- `<leader>e` - Toggle Neo-tree file explorer
+
+### File Finding
+
+```lua
+vim.keymap.set("n", "<leader> ", "<cmd>Telescope find_files<cr>", { desc = "Find Files" })
+vim.keymap.set("n", "<leader>ff", "<cmd>Telescope find_files<cr>", { desc = "Find Files" })
+```
+
+- `<leader><space>` - Find files with Telescope
+- `<leader>ff` - Find files (alternative)
+
+### Default Leader Key
+
+LazyVim uses `<space>` as the leader key by default.
+
+## Plugin Configuration
+
+### Catppuccin Theme
+
+The Catppuccin theme is configured with extensive integrations:
+
+```lua
+return {
+  "catppuccin/nvim",
+  lazy = true,
+  name = "catppuccin",
+  opts = {
+    lsp_styles = {
+      underlines = {
+        errors = { "undercurl" },
+        hints = { "undercurl" },
+        warnings = { "undercurl" },
+        information = { "undercurl" },
+      },
+    },
+    integrations = {
+      aerial = true,
+      cmp = true,
+      dashboard = true,
+      flash = true,
+      gitsigns = true,
+      illuminate = true,
+      indent_blankline = { enabled = true },
+      lsp_trouble = true,
+      mason = true,
+      neotree = true,
+      noice = true,
+      telescope = true,
+      treesitter_context = true,
+      which_key = true,
+      -- ... and more
+    },
+  },
+}
+```
+
+### Core Plugins
+
+Colorscheme is set to Catppuccin:
+
+```lua
+return {
+  {
+    "LazyVim/LazyVim",
+    opts = {
+      colorscheme = "catppuccin",
+    },
+  },
+}
+```
+
+### Telescope Configuration
+
+Telescope is configured to find hidden files:
+
+```lua
+{
+  "nvim-telescope/telescope.nvim",
+  opts = {
+    defaults = {
+      find_command = { "fd", "--type", "f", "--hidden", "--no-ignore" },
+    },
+    pickers = {
+      find_files = {
+        hidden = true,
+      },
+    },
+  },
+}
+```
+
+## Essential LazyVim Keybindings
+
+<Tabs>
+  <Tab title="File Navigation">
+    | Key | Description |
+    |-----|-------------|
+    | `<leader>e` | Toggle file explorer |
+    | `<leader><space>` | Find files |
+    | `<leader>ff` | Find files (alt) |
+    | `<leader>fr` | Recent files |
+    | `<leader>fg` | Grep in files |
+    | `<leader>fb` | Find buffers |
+  </Tab>
+  <Tab title="LSP">
+    | Key | Description |
+    |-----|-------------|
+    | `gd` | Go to definition |
+    | `gr` | Go to references |
+    | `K` | Hover documentation |
+    | `<leader>ca` | Code actions |
+    | `<leader>rn` | Rename symbol |
+    | `[d` | Previous diagnostic |
+    | `]d` | Next diagnostic |
+  </Tab>
+  <Tab title="Editing">
+    | Key | Description |
+    |-----|-------------|
+    | `<leader>w` | Save file |
+    | `<leader>q` | Quit |
+    | `gcc` | Toggle line comment |
+    | `gc` | Toggle comment (visual) |
+    | `<C-/>` | Toggle terminal |
+  </Tab>
+  <Tab title="Windows">
+    | Key | Description |
+    |-----|-------------|
+    | `<C-h>` | Move to left window |
+    | `<C-j>` | Move to bottom window |
+    | `<C-k>` | Move to top window |
+    | `<C-l>` | Move to right window |
+    | `<C-Up>` | Increase window height |
+    | `<C-Down>` | Decrease window height |
+  </Tab>
+</Tabs>
+
+## Installing Plugins
+
+Add new plugins by creating files in `lua/plugins/`:
+
+```lua
+-- lua/plugins/example.lua
+return {
+  "github/user/plugin-name",
+  opts = {
+    -- plugin configuration
+  },
+}
+```
+
+Lazy.nvim will automatically load all files in the plugins directory.
+
+## Managing Plugins
+
+- `:Lazy` - Open plugin manager UI
+- `:Lazy update` - Update all plugins
+- `:Lazy sync` - Install/update/clean plugins
+- `:Lazy clean` - Remove unused plugins
+
+## LSP Management
+
+LazyVim uses Mason for LSP server management:
+
+- `:Mason` - Open Mason UI
+- `:MasonInstall <server>` - Install LSP server
+- `:LspInfo` - Show LSP status
+
+## Code Formatting
+
+Formatting is handled by conform.nvim (included in LazyVim):
+
+- `<leader>cf` - Format current buffer
+- Auto-formatting on save (configurable)
+
+## FAQ
+
+<Accordion title="How do I change the colorscheme?">
+  Edit `lua/plugins/core.lua`:
+  
+  ```lua
+  opts = {
+    colorscheme = "tokyonight",  -- or any installed theme
+  },
+  ```
+</Accordion>
+
+<Accordion title="How do I disable a default plugin?">
+  Create a plugin spec with `enabled = false`:
+  
+  ```lua
+  -- lua/plugins/disable.lua
+  return {
+    { "plugin/name", enabled = false },
+  }
+  ```
+</Accordion>
+
+<Accordion title="Where are LazyVim default configs?">
+  LazyVim defaults are documented at:
+  
+  - [Options](https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/options.lua)
+  - [Keymaps](https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua)
+  - [Autocmds](https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/autocmds.lua)
+</Accordion>
+
+<Accordion title="How do I add a language server?">
+  Use Mason to install:
+  
+  ```vim
+  :Mason
+  ```
+  
+  Search for your language server and press `i` to install. LazyVim will auto-configure most servers.
+</Accordion>
+
+<Accordion title="How do I override LazyVim keymaps?">
+  Add your keymaps to `lua/config/keymaps.lua`. They will override defaults:
+  
+  ```lua
+  vim.keymap.set("n", "<leader>e", "<cmd>YourCommand<cr>")
+  ```
+</Accordion>
+
+## Stylua Configuration
+
+Lua code formatting is configured via `stylua.toml`:
+
+```toml
+column_width = 120
+indent_type = "Spaces"
+indent_width = 2
+```
+
+## Related Resources
+
+- [LazyVim Documentation](https://lazyvim.github.io/)
+- [Lazy.nvim Plugin Manager](https://github.com/folke/lazy.nvim)
+- [Catppuccin Theme](https://github.com/catppuccin/nvim)
+- See [Fish Shell](/config/fish) for terminal configuration
+- See [Tmux](/config/tmux) for terminal multiplexer

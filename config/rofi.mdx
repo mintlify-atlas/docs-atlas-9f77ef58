@@ -1,0 +1,454 @@
+---
+title: Rofi Configuration
+description: Customized Rofi application launcher with multiple modes and BeautySolar icon theme
+---
+
+## Overview
+
+Rofi is configured as a versatile application launcher supporting multiple modes including application launching, file browsing, window switching, and clipboard management.
+
+## Configuration Location
+
+```
+~/.config/rofi/
+├── config.rasi          # Main configuration
+├── colors/              # Color schemes
+├── fonts/               # Font configurations
+└── themes/              # Theme files
+    ├── clipboard.rasi
+    ├── defaul.rasi
+    └── launchers/       # Launcher layouts
+```
+
+## Modes
+
+Rofi is configured with multiple modes:
+
+```rasi
+modi: "drun,run,filebrowser,window,clipboard";
+```
+
+### Available Modes
+
+<Tabs>
+  <Tab title="drun">
+    **Desktop Applications**
+    
+    Shows `.desktop` files from:
+    - `/usr/share/applications/`
+    - `~/.local/share/applications/`
+    
+    Displays application names, icons, and descriptions.
+  </Tab>
+  <Tab title="run">
+    **Command Runner**
+    
+    Execute any command in your `$PATH`.
+    
+    Type command names directly (e.g., `firefox`, `htop`).
+  </Tab>
+  <Tab title="filebrowser">
+    **File Browser**
+    
+    Navigate and open files from the filesystem.
+    
+    Directories shown first, sorted by name.
+  </Tab>
+  <Tab title="window">
+    **Window Switcher**
+    
+    List all open windows across workspaces.
+    
+    Shows window title, class, and desktop.
+  </Tab>
+  <Tab title="clipboard">
+    **Clipboard History**
+    
+    Requires clipboard manager (e.g., `cliphist`).
+    
+    Access previously copied items.
+  </Tab>
+</Tabs>
+
+## General Settings
+
+### Behavior
+
+```rasi
+case-sensitive: false;
+cycle: true;
+show-icons: true;
+icon-theme: "BeautySolar";
+steal-focus: false;
+```
+
+- **Case-insensitive** search by default
+- **Cycling** through results enabled
+- **Icons** displayed using BeautySolar theme
+
+### Matching
+
+```rasi
+matching: "normal";
+tokenize: true;
+normalize-match: true;
+```
+
+Tokenized matching allows typing parts of words in any order.
+
+Example: Typing "fire fox" matches "Firefox".
+
+### Display Names
+
+```rasi
+display-window: "Windows";
+display-run: "Run";
+display-ssh: "SSH";
+display-drun: "Apps";
+display-filebrowser: "Files";
+display-clipboard: "Clipboard";
+```
+
+Custom labels for each mode.
+
+## Desktop Application Settings
+
+```rasi
+drun-match-fields: "name,generic,exec,categories,keywords";
+drun-display-format: "{name} [<span weight='light' size='small'><i>({generic})</i></span>]";
+drun-show-actions: false;
+```
+
+### Parsing Desktop Files
+
+```rasi
+drun {
+    parse-user: true;
+    parse-system: true;
+}
+```
+
+Searches both user and system `.desktop` files.
+
+### Fallback Icon
+
+```rasi
+run,drun {
+    fallback-icon: "application-x-addon";
+}
+```
+
+Displays a default icon for apps without icons.
+
+## File Browser Settings
+
+```rasi
+filebrowser {
+    directories-first: true;
+    sorting-method: "name";
+}
+```
+
+- Directories listed before files
+- Sorted alphabetically by name
+
+## Window Switcher Settings
+
+```rasi
+window-match-fields: "title,class,role,name,desktop";
+window-format: "{w} - {c} - {t:0}";
+window-thumbnail: false;
+```
+
+Format: `[window id] - [class] - [title]`
+
+## Appearance
+
+### Font
+
+```rasi
+font: "Sono 12";
+```
+
+Sono font at 12pt.
+
+### Terminal
+
+```rasi
+terminal: "rofi-sensible-terminal";
+```
+
+Used when launching commands that require a terminal.
+
+### Themes
+
+Rofi themes are loaded from `~/.config/rofi/themes/`.
+
+Example usage in Hyprland config:
+
+```conf
+$menu = rofi -show drun -theme launchers/gridmenu -drun-icon-theme "BeautySolar"
+```
+
+## Usage
+
+### Launching Rofi
+
+<Tabs>
+  <Tab title="Applications">
+    ```bash
+    rofi -show drun
+    ```
+    
+    Or with custom theme:
+    ```bash
+    rofi -show drun -theme launchers/gridmenu
+    ```
+  </Tab>
+  <Tab title="Commands">
+    ```bash
+    rofi -show run
+    ```
+  </Tab>
+  <Tab title="Windows">
+    ```bash
+    rofi -show window
+    ```
+  </Tab>
+  <Tab title="Files">
+    ```bash
+    rofi -show filebrowser
+    ```
+  </Tab>
+  <Tab title="Clipboard">
+    ```bash
+    cliphist list | rofi -dmenu -theme ~/.config/rofi/themes/clipboard.rasi | cliphist decode | wl-copy
+    ```
+  </Tab>
+</Tabs>
+
+### Keybindings
+
+Default Rofi keybindings:
+
+| Key | Action |
+|-----|--------|
+| `Enter` | Select item |
+| `Esc` | Close Rofi |
+| `Tab` | Next match |
+| `Shift+Tab` | Previous match |
+| `Ctrl+J/K` | Next/previous match (vi-style) |
+| `Ctrl+V` | Switch to next mode |
+| `Alt+[1-9]` | Jump to mode number |
+
+## Hyprland Integration
+
+In `~/.config/hypr/hyprland.conf`:
+
+```conf
+$menu = rofi -show drun -theme launchers/gridmenu -drun-icon-theme "BeautySolar"
+```
+
+Keybinding in `modules/keybindings.conf`:
+
+```conf
+bind = $mainMod, P, exec, $menu
+```
+
+**Default**: `Super + P` to launch Rofi.
+
+## Clipboard Integration
+
+Using `cliphist` for clipboard history:
+
+```conf
+bind = $mainMod, V, exec, cliphist list | rofi -dmenu -theme ~/.config/rofi/themes/clipboard.rasi | cliphist decode | wl-copy
+```
+
+**Default**: `Super + V` for clipboard history.
+
+### Setting Up cliphist
+
+```bash
+# Install cliphist
+sudo dnf install cliphist  # or build from source
+
+# Start clipboard daemon (add to Hyprland autostart)
+exec-once = wl-paste --type text --watch cliphist store
+exec-once = wl-paste --type image --watch cliphist store
+```
+
+## Customizing Themes
+
+### Using Built-in Themes
+
+```bash
+rofi-theme-selector
+```
+
+Interactive theme selector.
+
+### Creating Custom Themes
+
+Themes use RASI (Rofi Advanced Style Information) syntax:
+
+```rasi
+/* ~/.config/rofi/themes/custom.rasi */
+* {
+    background: #1e1e2e;
+    foreground: #cdd6f4;
+    accent: #89b4fa;
+}
+
+window {
+    border: 2px;
+    border-color: @accent;
+    border-radius: 8px;
+}
+```
+
+Apply:
+
+```bash
+rofi -show drun -theme custom
+```
+
+## Icon Theme
+
+### Installing BeautySolar
+
+The configuration uses the BeautySolar icon theme:
+
+```bash
+# Download from: https://github.com/beauty-cursor/beautysolar-icons
+# Or install via package manager if available
+```
+
+### Changing Icon Theme
+
+```rasi
+icon-theme: "Papirus";  # or any installed icon theme
+```
+
+Or override in launch command:
+
+```bash
+rofi -show drun -drun-icon-theme "Papirus"
+```
+
+## Performance
+
+### History
+
+```rasi
+disable-history: false;
+max-history-size: 25;
+```
+
+Stores last 25 selections for faster access.
+
+### Desktop Cache
+
+```rasi
+drun-use-desktop-cache: false;
+drun-reload-desktop-cache: false;
+```
+
+Disabled for always-fresh results (slight performance cost).
+
+## FAQ
+
+<Accordion title="Icons not showing?">
+  Install the icon theme:
+  
+  ```bash
+  sudo dnf install papirus-icon-theme
+  ```
+  
+  Set in config:
+  
+  ```rasi
+  icon-theme: "Papirus";
+  ```
+</Accordion>
+
+<Accordion title="How do I change the font?">
+  Edit `config.rasi`:
+  
+  ```rasi
+  font: "JetBrains Mono 14";
+  ```
+  
+  Ensure the font is installed system-wide.
+</Accordion>
+
+<Accordion title="Can I use Rofi for custom scripts?">
+  Yes! Use `-dmenu` mode:
+  
+  ```bash
+  echo -e "Option 1\nOption 2\nOption 3" | rofi -dmenu
+  ```
+  
+  Returns selected option to stdout.
+</Accordion>
+
+<Accordion title="How do I see all keybindings?">
+  Run:
+  
+  ```bash
+  rofi -show keys
+  ```
+  
+  Or check the man page:
+  
+  ```bash
+  man rofi
+  ```
+</Accordion>
+
+<Accordion title="Theme changes not applying?">
+  Ensure theme file exists:
+  
+  ```bash
+  ls ~/.config/rofi/themes/
+  ```
+  
+  Check for syntax errors:
+  
+  ```bash
+  rofi -show drun -theme mytheme -dump-xresources
+  ```
+</Accordion>
+
+## Advanced Usage
+
+### Custom Scripts with dmenu Mode
+
+```bash
+#!/bin/bash
+# Power menu example
+
+options="Shutdown\nReboot\nLogout\nSuspend"
+chosen=$(echo -e "$options" | rofi -dmenu -p "Power")
+
+case $chosen in
+    Shutdown) systemctl poweroff ;;
+    Reboot) systemctl reboot ;;
+    Logout) hyprctl dispatch exit ;;
+    Suspend) systemctl suspend ;;
+esac
+```
+
+### SSH Connection Launcher
+
+```bash
+rofi -show ssh
+```
+
+Reads from `~/.ssh/config` and `/etc/ssh/ssh_known_hosts`.
+
+## Related Configuration
+
+- See [Hyprland](/config/hyprland) for window manager integration
+- See [Waybar](/config/waybar) for status bar
+- See [Kitty](/config/kitty) for terminal setup
